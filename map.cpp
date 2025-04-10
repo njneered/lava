@@ -186,55 +186,73 @@ bool Map::parseLayers(XMLElement* mapElement, int width, int height) {
 
 
 void Map::draw(sf::RenderWindow& window) const {
-   if (tileTextures.empty()) return;
+    if (tileTextures.empty()) return;
 
+    // Get the spritesheet texture (we assume the first tileset is used)
+    auto it = tileTextures.begin();
+    const sf::Texture& tilesheet = it->second;
 
-   // Get the first texture as the tilesheet
-   auto it = tileTextures.begin();
-   const sf::Texture& tilesheet = it->second;
-   int tilesPerRow = tilesheet.getSize().x / tileWidth;
+    // Tileset configuration according to your .tsx file:
+    //   tilewidth = 32, tileheight (actual art) = 64, margin = 2, spacing = 2, columns = 6
+    const int margin  = 2;
+    const int spacing = 2;
+    const int columns = 6;
 
+    // Logical tile dimensions for isometric math (from Tiled)
+    // (Keep these as what Tiled sees in the map, e.g., 32x16)
+    // Even though the actual art is 64 pixels tall.
+    const int logicalTileWidth  = tileWidth;   // Should be 32.
+    const int logicalTileHeight = tileHeight;  // Should be 16.
 
-   sf::Sprite sprite;
-   sprite.setTexture(tilesheet);
+    // Actual art dimensions in the spritesheet
+    const int actualTileWidth  = 32;
+    const int actualTileHeight = 64;
 
+    sf::Sprite sprite;
+    sprite.setTexture(tilesheet);
 
-   for (const auto& layer : layers) {
-       for (int y = 0; y < layer.height; ++y) {
-           for (int x = 0; x < layer.width; ++x) {
-               int index = x + y * layer.width;
-               if (index >= layer.tileIDs.size()) continue;
+    // Loop through all layers and draw each tile.
+    for (const auto& layer : layers) {
+        for (int y = 0; y < layer.height; ++y) {
+            for (int x = 0; x < layer.width; ++x) {
+                int index = x + y * layer.width;
+                if (index >= static_cast<int>(layer.tileIDs.size()))
+                    continue;
 
+                unsigned tileID = layer.tileIDs[index];
+                if (tileID == 0)
+                    continue; // Skip empty tiles
 
-               unsigned tileID = layer.tileIDs[index];
-               if (tileID == 0) continue;
+                // Convert the 1-based GID to 0-based index.
+                unsigned gid = tileID - 1;
 
+                // Calculate the tile's position in the spritesheet (grid coordinates)
+                int tx = gid % columns;
+                int ty = gid / columns;
 
-               // Adjust for firstGID (assume it's 1)
-               unsigned gid = tileID - 1;
+                // Calculate the texture coordinates, including margin and spacing.
+                int textureX = margin + tx * (actualTileWidth + spacing);
+                int textureY = margin + ty * (actualTileHeight + spacing);
 
+                // Set the texture rectangle for the sprite (slicing out the entire 32×64 tile)
+                sprite.setTextureRect(sf::IntRect(textureX, textureY, actualTileWidth, actualTileHeight));
 
-               int tx = gid % tilesPerRow;
-               int ty = gid / tilesPerRow;
+                // ------------------------------------------------------------
+                // Compute the isometric display position using logical tile sizes
+                // ------------------------------------------------------------
+                float isoX = static_cast<float>((x - y) * (logicalTileWidth / 2.0f));
+                float isoY = static_cast<float>((x + y) * (logicalTileHeight / 2.0f));
 
+                // Shift the sprite upward so that its "foot" aligns with the isometric grid.
+                // (Actual tile height is 64 vs. logical height 16; offset = 64 - 16 = 48)
+                isoY -= (actualTileHeight - logicalTileHeight);
 
-               sprite.setTextureRect(sf::IntRect(
-                   tx * tileWidth,
-                   ty * tileHeight,
-                   tileWidth,
-                   tileHeight
-               ));
-
-
-               float isoX = static_cast<float>((x - y) * (tileWidth / 2));
-               float isoY = static_cast<float>((x + y) * (tileHeight / 2));
-
-
-               sprite.setPosition(isoX, isoY);
-               window.draw(sprite);
-           }
-       }
-   }
+                // Set position and draw the tile.
+                sprite.setPosition(isoX, isoY);
+                window.draw(sprite);
+            }
+        }
+    }
 }
 
 
