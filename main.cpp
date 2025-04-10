@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Map.h"
+#include "NaviGator.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!!!");
@@ -15,13 +16,16 @@ int main() {
 
     // Center the camera on the middle of the isometric map
     sf::View view;
-    view.setSize(static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y));
+    view.setSize(400, 300);
+    view.setCenter(0,0);
+    window.setView(view);
+
+    NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
 
     float centerX = ((gameMap.getWidth() - gameMap.getHeight()) * (32 / 2)) / 2.0f;
     float centerY = ((gameMap.getWidth() + gameMap.getHeight()) * (16 / 2)) / 2.0f;
 
-    view.setCenter(centerX, centerY);
-    window.setView(view);
+    sf::Clock clock;
 
     while (window.isOpen()) {
         sf::Event event;
@@ -30,8 +34,17 @@ int main() {
                 window.close();
         }
 
+        sf::Time frameTime = clock.restart(); // calculate elapsed time since the last fram
+
+        navigator.handleInput(frameTime);
+        navigator.update(frameTime);
+
+        view.setCenter(navigator.getPosition());
+        window.setView(view);
+
         window.clear(sf::Color::Black);
         gameMap.draw(window);
+        navigator.draw(window);
         window.display();
     }
 

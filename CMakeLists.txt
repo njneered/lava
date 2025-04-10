@@ -13,6 +13,8 @@ add_executable(the-floor-is-lava
         Map.h
         map.cpp
         include/tinyxml2-master/tinyxml2.cpp
+        NaviGator.h
+        navigator.cpp
 )
 
 target_link_libraries(the-floor-is-lava
