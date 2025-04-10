@@ -36,7 +36,7 @@ int main() {
 
         sf::Time frameTime = clock.restart(); // calculate elapsed time since the last fram
 
-        navigator.handleInput(frameTime);
+        navigator.handleInput(frameTime, event, view);
         navigator.update(frameTime);
 
         view.setCenter(navigator.getPosition());

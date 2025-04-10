@@ -15,7 +15,7 @@ NaviGator::NaviGator(const std::string &imagePath, const sf::Vector2f &startPosi
 
 }
 
-void NaviGator::handleInput(const sf::Time &frameTime) {
+void NaviGator::handleInput(const sf::Time &frameTime, const sf::Event &event, sf::View &gameView) {
     sf::Vector2f moveDirection(0.f, 0.f);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
@@ -35,6 +35,14 @@ void NaviGator::handleInput(const sf::Time &frameTime) {
     }
 
     navigatorSprite.move(moveDirection);
+
+    if (event.type == sf::Event::MouseWheelScrolled) {
+        if (event.mouseWheelScroll.delta > 0) {
+            gameView.zoom(0.9f); // Zoom in (reduce the view size by 10%).
+        } else if (event.mouseWheelScroll.delta < 0) {
+            gameView.zoom(1.1f); // Zoom out (increase the view size by 10%).
+        }
+    }
 }
 
 void NaviGator::update(const sf::Time &frameTime) {
