@@ -1,0 +1,6 @@
+# ninja log v6
+5	40	7660241027046416	CMakeFiles/the-floor-is-lava.dir/algorithms/AStar.cpp.obj	9b98aea1e8cdaf69
+9	371	7660241027096286	CMakeFiles/the-floor-is-lava.dir/include/tinyxml2-master/tinyxml2.cpp.obj	3ff76bc4783667ba
+2	616	7660241027026467	CMakeFiles/the-floor-is-lava.dir/main.cpp.obj	7ed7dcbfe8a7d08f
+7	823	7660241027076339	CMakeFiles/the-floor-is-lava.dir/map.cpp.obj	de4dfe8925e4f168
+823	1015	7660241035231259	the-floor-is-lava.exe	e1557fbb8b8202ba
