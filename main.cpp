@@ -3,7 +3,7 @@
 #include "Map.h"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!");
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!!!");
     window.setFramerateLimit(60);
 
     Map gameMap;
