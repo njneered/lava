@@ -36,7 +36,7 @@ class Map {
 
 
 
-
+    unsigned tilesetFirstGID;
     int tileWidth;
     int tileHeight;
 

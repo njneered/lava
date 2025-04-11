@@ -4,37 +4,72 @@
 
 #include "NaviGator.h"
 #include <iostream>
+#include <cmath>
 using namespace std;
 
-NaviGator::NaviGator(const std::string &imagePath, const sf::Vector2f &startPosition)
-    : navigatorSpeed(100.f) {
+// function to normalize a 2d vector
+sf::Vector2f normalize(const sf::Vector2f &v) {
+    float len = std::sqrt(v.x * v.x + v.y * v.y);
+    if (len != 0) {
+        return sf::Vector2f(v.x / len, v.y / len);
+    }
+    return sf::Vector2f(0.f, 0.f);
+}
 
+NaviGator::NaviGator(const std::string &imagePath, const sf::Vector2f &startPosition)
+    : navigatorSpeed(100.f), currentFrame(0), frameDuration(0.2f), animationTimer(0.f), isMoving(false) {
+
+    if (!navigatorTexture.loadFromFile(imagePath)) {
+        cerr << "Failed to load " << imagePath << "\n";
+    }
     navigatorSprite.setTexture(navigatorTexture);
-    navigatorSprite.setOrigin(navigatorTexture.getSize().x / 2.0f, navigatorTexture.getSize().y / 2.0f);
+
+    frames.push_back(sf::IntRect(0, 0, 32, 32)); // frame 0
+    frames.push_back(sf::IntRect(0, 32, 32, 32)); // frame 1
+
+    navigatorSprite.setOrigin(16, 16);
     navigatorSprite.setPosition(startPosition);
+
+    navigatorSprite.setTextureRect(frames[currentFrame]);
 
 }
 
 void NaviGator::handleInput(const sf::Time &frameTime, const sf::Event &event, sf::View &gameView) {
-    sf::Vector2f moveDirection(0.f, 0.f);
+    sf::Vector2f input(0.f, 0.f);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-        moveDirection.y -= navigatorSpeed * frameTime.asSeconds();
+        input.y -= 1.f;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-        moveDirection.x -= navigatorSpeed * frameTime.asSeconds();
+        input.x -= 1.f;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-        moveDirection.y += navigatorSpeed * frameTime.asSeconds();
+        input.y += 1.f;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-        moveDirection.x += navigatorSpeed * frameTime.asSeconds();
+        input.x += 1.f;
     }
 
-    navigatorSprite.move(moveDirection);
+    // normalize input so diagonal movement is not faster
+    if (input.x != 0.f || input.y != 0.f) {
+        input = normalize(input);
+    }
+
+    // rotate input by 45 deg to convert from cartesian movement to isometric movement
+    // since (cos(45) approx (45) approx 0.7071
+    const float cos45 = 0.7071f;
+    const float sin45 = 0.7071f;
+    sf::Vector2f isometricMovement;
+    isometricMovement.x = cos45 * input.x - sin45 * input.y;
+    isometricMovement.y = sin45 * input.x + cos45 * input.y;
+    isometricMovement *= navigatorSpeed * frameTime.asSeconds();
+
+    navigatorSprite.move(isometricMovement);
+    isMoving = (input.x != 0.f || input.y != 0.f);
+
 
     if (event.type == sf::Event::MouseWheelScrolled) {
         if (event.mouseWheelScroll.delta > 0) {
@@ -46,7 +81,19 @@ void NaviGator::handleInput(const sf::Time &frameTime, const sf::Event &event, s
 }
 
 void NaviGator::update(const sf::Time &frameTime) {
-    // implement later
+    if (isMoving) {
+        animationTimer += frameTime.asSeconds();
+        if (animationTimer >= frameDuration) {
+            animationTimer = 0.f;
+            currentFrame = (currentFrame + 1) % frames.size();
+            updateFrame();
+        }
+    }
+    else {
+        currentFrame = 0;
+        updateFrame();
+        animationTimer = 0.f;
+    }
 }
 
 void NaviGator::draw(sf::RenderWindow &window) {
@@ -55,6 +102,10 @@ void NaviGator::draw(sf::RenderWindow &window) {
 
 sf::Vector2f NaviGator::getPosition() const {
     return navigatorSprite.getPosition();
+}
+
+void NaviGator::updateFrame() {
+    navigatorSprite.setTextureRect(frames[currentFrame]);
 }
 
 

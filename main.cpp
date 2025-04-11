@@ -22,21 +22,27 @@ int main() {
 
     NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
 
-    float centerX = ((gameMap.getWidth() - gameMap.getHeight()) * (32 / 2)) / 2.0f;
-    float centerY = ((gameMap.getWidth() + gameMap.getHeight()) * (16 / 2)) / 2.0f;
+    // float centerX = ((gameMap.getWidth() - gameMap.getHeight()) * (32 / 2)) / 2.0f;
+    // float centerY = ((gameMap.getWidth() + gameMap.getHeight()) * (16 / 2)) / 2.0f;
 
     sf::Clock clock;
 
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
+
+            navigator.handleInput(sf::Time::Zero, event, view);
         }
+
 
         sf::Time frameTime = clock.restart(); // calculate elapsed time since the last fram
 
-        navigator.handleInput(frameTime, event, view);
+        sf::Event dummyEvent; // dummy event that doesnt trigger anything
+        dummyEvent.type = sf::Event::Count;
+        navigator.handleInput(frameTime, dummyEvent, view);
         navigator.update(frameTime);
 
         view.setCenter(navigator.getPosition());
@@ -46,6 +52,7 @@ int main() {
         gameMap.draw(window);
         navigator.draw(window);
         window.display();
+
     }
 
     return 0;

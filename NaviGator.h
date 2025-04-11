@@ -15,13 +15,20 @@ class NaviGator {
     sf::Sprite navigatorSprite;
     float navigatorSpeed; // pixels per second
 
+    vector<sf::IntRect> frames;
+    int currentFrame;
+    float frameDuration; // how long each frame stays in seconds
+    float animationTimer; // accumulates elapsed time
+    bool isMoving;
+
+    void updateFrame();
+
 public:
     NaviGator(const string& texturePath, const sf::Vector2f &startPosition);
     void handleInput(const sf::Time &frameTime, const sf::Event &event, sf::View &gameView);
     void update(const sf::Time &frameTime);
     void draw(sf::RenderWindow &window);
     sf::Vector2f getPosition() const;
-
 };
 
 #endif //NAVIGATOR_H
