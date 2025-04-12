@@ -21,6 +21,8 @@ add_executable(the-floor-is-lava
         background.cpp
         Soundtrack.h
         soundtrack.cpp
+        UX.h
+        ux.cpp
 )
 
 target_link_libraries(the-floor-is-lava

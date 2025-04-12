@@ -10,9 +10,11 @@ Background::Background(const string &imagePath) {
     if(!texture.loadFromFile(imagePath)) {
         cerr << "Failed to load background image: " <<imagePath << endl;
     }
-
     sprite.setTexture(texture);
-    sprite.setScale(1280.f/texture.getSize().x, 720.f/texture.getSize().y);
+    sf::Vector2u size = texture.getSize();
+    float scaleX = 1280.f / static_cast<float>(size.x);
+    float scaleY = 720.f / static_cast<float>(size.y);
+    sprite.setScale(scaleX, scaleY);
 }
 
 void Background::setScale(float scaleX, float scaleY) {

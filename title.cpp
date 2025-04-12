@@ -53,7 +53,16 @@ void Title::handleEvent(const sf::Event &event) {
 }
 
 void Title::draw(sf::RenderWindow& window) {
+    const float padding = 10.f;
     for (auto& t : lines) {
+        sf::FloatRect bounds = t.getGlobalBounds();
+        sf::RectangleShape rect(sf::Vector2f(bounds.width + padding * 2, bounds.height + padding * 2));
+        rect.setFillColor(sf::Color(255, 255, 255, 200)); // translucent white
+        float rectX = t.getPosition().x - bounds.width / 2.f - padding;
+        float rectY = t.getPosition().y - padding;
+        rect.setPosition(rectX, rectY);
+
+        window.draw(rect);
         window.draw(t);
     }
 }

@@ -6,6 +6,7 @@
 #include "NaviGator.h"
 #include "Title.h"
 #include "Soundtrack.h"
+#include "UX.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!!!");
@@ -24,7 +25,7 @@ int main() {
 
 
     // TITLE SCREEN
-    Background background("assets/sky.jpeg");
+    Background background("assets/welcomewindow1.jpeg");
     Title title;
 
     while (window.isOpen() && !title.isFinished()) {
@@ -38,7 +39,7 @@ int main() {
         }
 
 
-        window.clear(sf::Color::Black);
+        window.clear();
         window.setView(window.getDefaultView());
         background.draw(window);
         title.draw(window);
@@ -63,11 +64,13 @@ int main() {
     view.setCenter(0,0);
     window.setView(view);
 
+    Background gameBackground("assets/sky.jpeg");
+
     NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
     sf::Clock clock;
 
 
-
+    UX ux("The Floor is Lava!\n\nUse WASD to move.");
 
 
     // MAIN GAME
@@ -93,10 +96,15 @@ int main() {
 
         window.clear(sf::Color::Black);
         window.setView(window.getDefaultView());
-        background.draw(window);
+        gameBackground.draw(window);
+
         window.setView(view);
         gameMap.draw(window);
         navigator.draw(window);
+
+
+        window.setView(window.getDefaultView());
+        ux.draw(window);
         window.display();
 
     }

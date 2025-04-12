@@ -105,6 +105,13 @@ build CMakeFiles/the-floor-is-lava.dir/soundtrack.cpp.obj: CXX_COMPILER__the-flo
   OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
   OBJECT_FILE_DIR = CMakeFiles\the-floor-is-lava.dir
 
+build CMakeFiles/the-floor-is-lava.dir/ux.cpp.obj: CXX_COMPILER__the-floor-is-lava_unscanned_Debug C$:/Users/Nj/CLionProjects/TheFloorIsLava/ux.cpp || cmake_object_order_depends_target_the-floor-is-lava
+  DEP_FILE = CMakeFiles\the-floor-is-lava.dir\ux.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/Nj/CLionProjects/TheFloorIsLava/include
+  OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-floor-is-lava.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target the-floor-is-lava
@@ -113,7 +120,7 @@ build CMakeFiles/the-floor-is-lava.dir/soundtrack.cpp.obj: CXX_COMPILER__the-flo
 #############################################
 # Link the executable the-floor-is-lava.exe
 
-build the-floor-is-lava.exe: CXX_EXECUTABLE_LINKER__the-floor-is-lava_Debug CMakeFiles/the-floor-is-lava.dir/main.cpp.obj CMakeFiles/the-floor-is-lava.dir/algorithms/AStar.cpp.obj CMakeFiles/the-floor-is-lava.dir/map.cpp.obj CMakeFiles/the-floor-is-lava.dir/include/tinyxml2-master/tinyxml2.cpp.obj CMakeFiles/the-floor-is-lava.dir/navigator.cpp.obj CMakeFiles/the-floor-is-lava.dir/title.cpp.obj CMakeFiles/the-floor-is-lava.dir/background.cpp.obj CMakeFiles/the-floor-is-lava.dir/soundtrack.cpp.obj
+build the-floor-is-lava.exe: CXX_EXECUTABLE_LINKER__the-floor-is-lava_Debug CMakeFiles/the-floor-is-lava.dir/main.cpp.obj CMakeFiles/the-floor-is-lava.dir/algorithms/AStar.cpp.obj CMakeFiles/the-floor-is-lava.dir/map.cpp.obj CMakeFiles/the-floor-is-lava.dir/include/tinyxml2-master/tinyxml2.cpp.obj CMakeFiles/the-floor-is-lava.dir/navigator.cpp.obj CMakeFiles/the-floor-is-lava.dir/title.cpp.obj CMakeFiles/the-floor-is-lava.dir/background.cpp.obj CMakeFiles/the-floor-is-lava.dir/soundtrack.cpp.obj CMakeFiles/the-floor-is-lava.dir/ux.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lsfml-graphics  -lsfml-window  -lsfml-system  -lsfml-main  -lsfml-audio  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   LINK_PATH = -LC:/Users/Nj/CLionProjects/TheFloorIsLava/lib
