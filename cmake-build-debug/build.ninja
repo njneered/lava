@@ -84,6 +84,27 @@ build CMakeFiles/the-floor-is-lava.dir/navigator.cpp.obj: CXX_COMPILER__the-floo
   OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
   OBJECT_FILE_DIR = CMakeFiles\the-floor-is-lava.dir
 
+build CMakeFiles/the-floor-is-lava.dir/title.cpp.obj: CXX_COMPILER__the-floor-is-lava_unscanned_Debug C$:/Users/Nj/CLionProjects/TheFloorIsLava/title.cpp || cmake_object_order_depends_target_the-floor-is-lava
+  DEP_FILE = CMakeFiles\the-floor-is-lava.dir\title.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/Nj/CLionProjects/TheFloorIsLava/include
+  OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-floor-is-lava.dir
+
+build CMakeFiles/the-floor-is-lava.dir/background.cpp.obj: CXX_COMPILER__the-floor-is-lava_unscanned_Debug C$:/Users/Nj/CLionProjects/TheFloorIsLava/background.cpp || cmake_object_order_depends_target_the-floor-is-lava
+  DEP_FILE = CMakeFiles\the-floor-is-lava.dir\background.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/Nj/CLionProjects/TheFloorIsLava/include
+  OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-floor-is-lava.dir
+
+build CMakeFiles/the-floor-is-lava.dir/soundtrack.cpp.obj: CXX_COMPILER__the-floor-is-lava_unscanned_Debug C$:/Users/Nj/CLionProjects/TheFloorIsLava/soundtrack.cpp || cmake_object_order_depends_target_the-floor-is-lava
+  DEP_FILE = CMakeFiles\the-floor-is-lava.dir\soundtrack.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/Nj/CLionProjects/TheFloorIsLava/include
+  OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
+  OBJECT_FILE_DIR = CMakeFiles\the-floor-is-lava.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target the-floor-is-lava
@@ -92,12 +113,12 @@ build CMakeFiles/the-floor-is-lava.dir/navigator.cpp.obj: CXX_COMPILER__the-floo
 #############################################
 # Link the executable the-floor-is-lava.exe
 
-build the-floor-is-lava.exe: CXX_EXECUTABLE_LINKER__the-floor-is-lava_Debug CMakeFiles/the-floor-is-lava.dir/main.cpp.obj CMakeFiles/the-floor-is-lava.dir/algorithms/AStar.cpp.obj CMakeFiles/the-floor-is-lava.dir/map.cpp.obj CMakeFiles/the-floor-is-lava.dir/include/tinyxml2-master/tinyxml2.cpp.obj CMakeFiles/the-floor-is-lava.dir/navigator.cpp.obj
+build the-floor-is-lava.exe: CXX_EXECUTABLE_LINKER__the-floor-is-lava_Debug CMakeFiles/the-floor-is-lava.dir/main.cpp.obj CMakeFiles/the-floor-is-lava.dir/algorithms/AStar.cpp.obj CMakeFiles/the-floor-is-lava.dir/map.cpp.obj CMakeFiles/the-floor-is-lava.dir/include/tinyxml2-master/tinyxml2.cpp.obj CMakeFiles/the-floor-is-lava.dir/navigator.cpp.obj CMakeFiles/the-floor-is-lava.dir/title.cpp.obj CMakeFiles/the-floor-is-lava.dir/background.cpp.obj CMakeFiles/the-floor-is-lava.dir/soundtrack.cpp.obj
   FLAGS = -g
-  LINK_LIBRARIES = -lsfml-graphics  -lsfml-window  -lsfml-system  -lsfml-main  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = -lsfml-graphics  -lsfml-window  -lsfml-system  -lsfml-main  -lsfml-audio  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   LINK_PATH = -LC:/Users/Nj/CLionProjects/TheFloorIsLava/lib
   OBJECT_DIR = CMakeFiles\the-floor-is-lava.dir
-  POST_BUILD = C:\Windows\system32\cmd.exe /C "cd /D C:\Users\Nj\CLionProjects\TheFloorIsLava\cmake-build-debug && "C:\Program Files\JetBrains\CLion 2024.1.4\bin\cmake\win\x64\bin\cmake.exe" -E copy_if_different C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-graphics-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-window-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-system-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/cmake-build-debug"
+  POST_BUILD = C:\Windows\system32\cmd.exe /C "cd /D C:\Users\Nj\CLionProjects\TheFloorIsLava\cmake-build-debug && "C:\Program Files\JetBrains\CLion 2024.1.4\bin\cmake\win\x64\bin\cmake.exe" -E copy_if_different C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-graphics-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-window-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-system-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/sfml-audio-2.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/bin/openal32.dll C:/Users/Nj/CLionProjects/TheFloorIsLava/cmake-build-debug"
   PRE_LINK = cd .
   TARGET_FILE = the-floor-is-lava.exe
   TARGET_IMPLIB = libthe-floor-is-lava.dll.a

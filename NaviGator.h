@@ -7,7 +7,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
-#include <iostream>
+#include <vector>
 using namespace std;
 
 class NaviGator {
@@ -29,6 +29,8 @@ public:
     void update(const sf::Time &frameTime);
     void draw(sf::RenderWindow &window);
     sf::Vector2f getPosition() const;
+
+    void setScale(const sf::Vector2f &scale); // set scale for main character sprite
 };
 
 #endif //NAVIGATOR_H

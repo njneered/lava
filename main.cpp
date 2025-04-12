@@ -1,12 +1,55 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+
+#include "Background.h"
 #include "Map.h"
 #include "NaviGator.h"
+#include "Title.h"
+#include "Soundtrack.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!!!");
     window.setFramerateLimit(60);
 
+
+    // MUSIC
+    Soundtrack soundtrack;
+    if (!soundtrack.loadFromFile("assets/soundtrack.mp3")) {
+        cerr << "Failed to load soundtrack" << endl;
+    }
+    soundtrack.play();
+
+
+
+
+
+    // TITLE SCREEN
+    Background background("assets/sky.jpeg");
+    Title title;
+
+    while (window.isOpen() && !title.isFinished()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+
+            title.handleEvent(event);
+        }
+
+
+        window.clear(sf::Color::Black);
+        window.setView(window.getDefaultView());
+        background.draw(window);
+        title.draw(window);
+        window.display();
+    }
+
+
+
+
+
+    // GAME
     Map gameMap;
 
     if (!gameMap.loadFromFile("maps/map.tmx", 32, 16)) {
@@ -21,12 +64,13 @@ int main() {
     window.setView(view);
 
     NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
-
-    // float centerX = ((gameMap.getWidth() - gameMap.getHeight()) * (32 / 2)) / 2.0f;
-    // float centerY = ((gameMap.getWidth() + gameMap.getHeight()) * (16 / 2)) / 2.0f;
-
     sf::Clock clock;
 
+
+
+
+
+    // MAIN GAME
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -44,11 +88,13 @@ int main() {
         dummyEvent.type = sf::Event::Count;
         navigator.handleInput(frameTime, dummyEvent, view);
         navigator.update(frameTime);
-
         view.setCenter(navigator.getPosition());
         window.setView(view);
 
         window.clear(sf::Color::Black);
+        window.setView(window.getDefaultView());
+        background.draw(window);
+        window.setView(view);
         gameMap.draw(window);
         navigator.draw(window);
         window.display();
@@ -58,3 +104,9 @@ int main() {
     return 0;
 }
 
+/*
+ * MUSIC:
+* Music from #Uppbeat (free for Creators!):
+https://uppbeat.io/t/color-parade/pixel-playground
+License code: YXK8LCR0AWJD0S3M
+ */

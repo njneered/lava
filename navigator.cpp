@@ -108,5 +108,8 @@ void NaviGator::updateFrame() {
     navigatorSprite.setTextureRect(frames[currentFrame]);
 }
 
+void NaviGator::setScale(const sf::Vector2f &scale) {
+    navigatorSprite.setScale(scale);
+}
 
 

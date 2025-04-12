@@ -15,18 +15,27 @@ add_executable(the-floor-is-lava
         include/tinyxml2-master/tinyxml2.cpp
         NaviGator.h
         navigator.cpp
+        Title.h
+        title.cpp
+        Background.h
+        background.cpp
+        Soundtrack.h
+        soundtrack.cpp
 )
 
 target_link_libraries(the-floor-is-lava
         sfml-graphics
         sfml-window
         sfml-system
-        sfml-main)
+        sfml-main
+        sfml-audio)
 
 add_custom_command(TARGET the-floor-is-lava POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/bin/sfml-graphics-2.dll"
         "${CMAKE_SOURCE_DIR}/bin/sfml-window-2.dll"
         "${CMAKE_SOURCE_DIR}/bin/sfml-system-2.dll"
+        "${CMAKE_SOURCE_DIR}/bin/sfml-audio-2.dll"
+        "${CMAKE_SOURCE_DIR}/bin/openal32.dll"
         $<TARGET_FILE_DIR:the-floor-is-lava>
 )
