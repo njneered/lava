@@ -1,5 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <cmath>
 
 #include "Background.h"
 #include "Map.h"
@@ -7,35 +10,44 @@
 #include "Title.h"
 #include "Soundtrack.h"
 #include "UX.h"
+#include "GPS.h"
+
+// Dummy pathfinding (replace with A* or Dijkstra later)
+std::vector<sf::Vector2i> findPath(Map& map, sf::Vector2i start, sf::Vector2i goal) {
+    std::vector<sf::Vector2i> path;
+    sf::Vector2i current = start;
+    int dx = (goal.x > start.x) ? 1 : -1;
+    int dy = (goal.y > start.y) ? 1 : -1;
+
+    while (current != goal) {
+        if (current.x != goal.x) current.x += dx;
+        else if (current.y != goal.y) current.y += dy;
+        path.push_back(current);
+    }
+    path.push_back(goal); // include goal
+    return path;
+}
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!!!");
     window.setFramerateLimit(60);
 
-
-    // MUSIC
+    // --- Soundtrack ---
     Soundtrack soundtrack;
     if (!soundtrack.loadFromFile("assets/soundtrack.mp3")) {
-        cerr << "Failed to load soundtrack" << endl;
+        std::cerr << "Failed to load soundtrack" << std::endl;
     }
     soundtrack.play();
 
-
-    // TITLE SCREEN
+    // --- Title screen ---
     Background background("assets/sky.jpeg");
     Title title;
-
     while (window.isOpen() && !title.isFinished()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-
+            if (event.type == sf::Event::Closed) window.close();
             title.handleEvent(event);
         }
-
-
         window.clear();
         window.setView(window.getDefaultView());
         background.draw(window);
@@ -43,93 +55,97 @@ int main() {
         window.display();
     }
 
-
-    // GAME
+    // --- Game setup ---
     Map gameMap;
-
     if (!gameMap.loadFromFile("maps/map.tmx", 32, 16)) {
         std::cerr << "Failed to load the map.\n";
         return 1;
     }
 
-    // CAMERA
     sf::View view;
     view.setSize(400, 300);
-    view.setCenter(0,0);
+
+    float centerX = ((gameMap.getWidth() - gameMap.getHeight()) * 16.f) / 2.f;
+    float centerY = ((gameMap.getWidth() + gameMap.getHeight()) * 8.f) / 2.f;
+    view.setCenter(centerX, centerY);
     window.setView(view);
 
     Background gameBackground("assets/sky.jpeg");
     NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
     sf::Clock clock;
     UX ux("The Floor is Lava!\nUse WASD to move.");
+    ux.setSecondaryMessage("Press 1 for Dijkstra's, and 2 for A*");
+    ux.setInstructionMessage("Click the textbox below and type tile coordinates (e.g., 65 9)");
 
-    sf::Vector2i pointB(-1, -1); // stores the user's selected destination tile which is called Point B
+    sf::Vector2i pointB(-1, -1);
+    GPS gps;
+    AlgorithmType currentAlgo = DIJKSTRA;
 
-    // MAIN GAME
+    // --- Main game loop ---
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
+            if (event.type == sf::Event::Closed) window.close();
+
+            // Handle UI textbox typing
+            ux.handleEvent(event, window);
+
+            // Confirm typed coordinates with Enter
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter && ux.hasValidInput()) {
+                pointB = ux.getTypedCoordinates();
+                std::cout << "📍 Set Point B to (" << pointB.x << ", " << pointB.y << ")\n";
+
+                float ax = (navigator.getPosition().y / 8.0f + navigator.getPosition().x / 16.0f) / 2.0f;
+                float ay = (navigator.getPosition().y / 8.0f - navigator.getPosition().x / 16.0f) / 2.0f;
+                sf::Vector2i pointA(static_cast<int>(ax), static_cast<int>(ay));
+
+                std::vector<sf::Vector2i> path = findPath(gameMap, pointA, pointB);
+                gps.setPath(path, currentAlgo);
+                ux.resetTypedCoordinates();
             }
 
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-                sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
-                sf::Vector2f worldPos = window.mapPixelToCoords(mousePixel);
-
-                float tempX = (worldPos.y / 8.0f + worldPos.x / 16.0f) / 2.0f;
-                float tempY = (worldPos.y / 8.0f - worldPos.x / 16.0f) / 2.0f;
-                int tileX = static_cast<int>(tempX);
-                int tileY = static_cast<int>(tempY);
-
-
-                if (tileX >= 0 && tileY >= 0 && tileX < gameMap.getWidth() && tileY < gameMap.getHeight()) {
-                    pointB = sf::Vector2i(tileX, tileY);
-                    std::cout << "You clicked on tile (" << tileX << ", " << tileY << ") to set Point B.\n";
+            // Toggle algorithm
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Num1) {
+                    currentAlgo = DIJKSTRA;
+                    std::cout << "Switched to Dijkstra's Algorithm\n";
+                } else if (event.key.code == sf::Keyboard::Num2) {
+                    currentAlgo = ASTAR;
+                    std::cout << "Switched to A* Algorithm\n";
                 }
             }
 
             navigator.handleInput(sf::Time::Zero, event, view);
         }
 
-
-        sf::Time frameTime = clock.restart(); // calculate elapsed time since the last fram
-        sf::Event dummyEvent; // dummy event that doesnt trigger anything
-        dummyEvent.type = sf::Event::Count;
-        navigator.handleInput(frameTime, dummyEvent, view);
+        // Update logic
+        sf::Time frameTime = clock.restart();
+        navigator.handleInput(frameTime, sf::Event(), view);
         navigator.update(frameTime);
+        gps.update(frameTime.asSeconds());
+
         view.setCenter(navigator.getPosition());
         window.setView(view);
 
+        // Drawing
         window.clear(sf::Color::Black);
         window.setView(window.getDefaultView());
         gameBackground.draw(window);
 
         window.setView(view);
         gameMap.draw(window);
+        gps.draw(window);
         navigator.draw(window);
 
-
-        if (pointB.x != -1 && pointB.y != -1) { // MARKER FOR POINT B
-            sf::CircleShape marker(6);
-            marker.setFillColor(sf::Color::Yellow);
-            marker.setOrigin(6, 6);
-
-            float isoX = (pointB.x - pointB.y) * 16.0f;
-            float isoY = (pointB.x + pointB.y) * 8.0f;
-            marker.setPosition(isoX, isoY);
-
-            window.draw(marker);
-        }
-
         window.setView(window.getDefaultView());
-        ux.draw(window);
+        ux.updateCursor();
+        ux.draw(window); // includes textbox and messages
         window.display();
-
     }
 
     return 0;
 }
+
 
 /*
  * MUSIC:

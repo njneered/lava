@@ -23,6 +23,8 @@ add_executable(the-floor-is-lava
         soundtrack.cpp
         UX.h
         ux.cpp
+        GPS.h
+        gps.cpp
 )
 
 target_link_libraries(the-floor-is-lava
