@@ -4,27 +4,29 @@ project(the-floor-is-lava)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(include)
+include_directories(algorithms)
+include_directories(UI-UX)
 link_directories(lib)
 
 add_executable(the-floor-is-lava
         main.cpp
-        algorithms/AStar.cpp
-        algorithms/AStar.h
-        Map.h
-        map.cpp
+        UI-UX/Map.h
+        UI-UX/map.cpp
         include/tinyxml2-master/tinyxml2.cpp
-        NaviGator.h
-        navigator.cpp
-        Title.h
-        title.cpp
-        Background.h
-        background.cpp
-        Soundtrack.h
-        soundtrack.cpp
-        UX.h
-        ux.cpp
-        GPS.h
-        gps.cpp
+        UI-UX/NaviGator.h
+        UI-UX/navigator.cpp
+        UI-UX/Title.h
+        UI-UX/title.cpp
+        UI-UX/Background.h
+        UI-UX/background.cpp
+        UI-UX/Soundtrack.h
+        UI-UX/soundtrack.cpp
+        UI-UX/UX.h
+        UI-UX/ux.cpp
+        UI-UX/GPS.h
+        UI-UX/gps.cpp
+        algorithms/Algorithms.h
+        algorithms/algorithms.cpp
 )
 
 target_link_libraries(the-floor-is-lava

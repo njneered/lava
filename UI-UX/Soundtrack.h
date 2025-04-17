@@ -5,7 +5,7 @@
 #ifndef SOUNDTRACK_H
 #define SOUNDTRACK_H
 
-#include <SFML/Audio.hpp>
+#include <../include/SFML/Audio.hpp>
 #include <string>
 using namespace std;
 

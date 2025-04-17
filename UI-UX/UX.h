@@ -14,25 +14,42 @@ class UX {
     sf::Text text;
     sf::Text secondaryText;
     sf::Text instructionText;
-    bool typingActive;
-    sf::RectangleShape inputBox;
     sf::Text inputText;
-    std::string typedCoords;
+    sf::Text coordConfirmText;
+
+    sf::RectangleShape inputBox;
+    sf::RectangleShape confirmBackground;
     sf::RectangleShape cursor;
+
+    std::string typedCoords;
+    std::string coordMessage;
+
     sf::Clock cursorTimer;
+
+    bool typingActive;
     bool cursorVisible;
+
+
+
 
 public:
     UX(const string& message);
+
     void setMessage(const string& message);
     void setSecondaryMessage(const string& message);
     void setInstructionMessage(const string& message);
+
     void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
     bool hasValidInput() const;
-    sf::Vector2i getTypedCoordinates() const;
     void resetTypedCoordinates();
     void draw(sf::RenderWindow& window);
+
     void updateCursor();
+    void setConfirmationMessage(const std::string& message);
+    void clearConfirmationMessage();
+
+    sf::Vector2i getTypedCoordinates() const;
+
 };
 
 #endif //UX_H

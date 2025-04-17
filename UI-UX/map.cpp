@@ -1,5 +1,6 @@
-#include "../Map.h"
+#include "Map.h"
 #include <sstream>
+#include <iostream>
 
 using namespace tinyxml2;
 

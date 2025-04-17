@@ -5,7 +5,7 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
-#include <SFML/Graphics.hpp>
+#include <../include/SFML/Graphics.hpp>
 #include <string>
 using namespace std;
 
