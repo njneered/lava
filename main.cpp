@@ -141,4 +141,10 @@ int main() {
 * Music from #Uppbeat (free for Creators!):
 https://uppbeat.io/t/color-parade/pixel-playground
 License code: YXK8LCR0AWJD0S3M
- */
+
+CITATIONS:
+https://www.sfml-dev.org/documentation/3.0.0/
+https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+https://github.com/leethomason/tinyxml2.git
+*/
