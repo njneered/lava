@@ -21,11 +21,8 @@ int main() {
     soundtrack.play();
 
 
-
-
-
     // TITLE SCREEN
-    Background background("assets/welcomewindow1.jpeg");
+    Background background("assets/sky.jpeg");
     Title title;
 
     while (window.isOpen() && !title.isFinished()) {
@@ -47,9 +44,6 @@ int main() {
     }
 
 
-
-
-
     // GAME
     Map gameMap;
 
@@ -58,20 +52,18 @@ int main() {
         return 1;
     }
 
-    // Center the camera on the middle of the isometric map
+    // CAMERA
     sf::View view;
     view.setSize(400, 300);
     view.setCenter(0,0);
     window.setView(view);
 
     Background gameBackground("assets/sky.jpeg");
-
     NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
     sf::Clock clock;
+    UX ux("The Floor is Lava!\nUse WASD to move.");
 
-
-    UX ux("The Floor is Lava!\n\nUse WASD to move.");
-
+    sf::Vector2i pointB(-1, -1); // stores the user's selected destination tile which is called Point B
 
     // MAIN GAME
     while (window.isOpen()) {
@@ -81,12 +73,27 @@ int main() {
                 window.close();
             }
 
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(mousePixel);
+
+                float tempX = (worldPos.y / 8.0f + worldPos.x / 16.0f) / 2.0f;
+                float tempY = (worldPos.y / 8.0f - worldPos.x / 16.0f) / 2.0f;
+                int tileX = static_cast<int>(tempX);
+                int tileY = static_cast<int>(tempY);
+
+
+                if (tileX >= 0 && tileY >= 0 && tileX < gameMap.getWidth() && tileY < gameMap.getHeight()) {
+                    pointB = sf::Vector2i(tileX, tileY);
+                    std::cout << "You clicked on tile (" << tileX << ", " << tileY << ") to set Point B.\n";
+                }
+            }
+
             navigator.handleInput(sf::Time::Zero, event, view);
         }
 
 
         sf::Time frameTime = clock.restart(); // calculate elapsed time since the last fram
-
         sf::Event dummyEvent; // dummy event that doesnt trigger anything
         dummyEvent.type = sf::Event::Count;
         navigator.handleInput(frameTime, dummyEvent, view);
@@ -102,6 +109,18 @@ int main() {
         gameMap.draw(window);
         navigator.draw(window);
 
+
+        if (pointB.x != -1 && pointB.y != -1) { // MARKER FOR POINT B
+            sf::CircleShape marker(6);
+            marker.setFillColor(sf::Color::Yellow);
+            marker.setOrigin(6, 6);
+
+            float isoX = (pointB.x - pointB.y) * 16.0f;
+            float isoY = (pointB.x + pointB.y) * 8.0f;
+            marker.setPosition(isoX, isoY);
+
+            window.draw(marker);
+        }
 
         window.setView(window.getDefaultView());
         ux.draw(window);

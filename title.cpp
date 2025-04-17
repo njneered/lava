@@ -7,64 +7,59 @@
 #include <iostream>
 using namespace std;
 
-Title::Title(const string& message) : finished(false) {
+Title::Title() : finished(false) {
     if (!font.loadFromFile("font/aesymatt.ttf")) {
         std::cerr << "Failed to load font" << std::endl;
     }
 
-    istringstream iss(message);
-    string lineStr;
-    while(getline(iss, lineStr)) {
-        if (!lineStr.empty() && lineStr.back() == '\r')
-            lineStr.pop_back();
-        sf::Text t;
-        t.setFont(font);
-        t.setString(lineStr);
-        t.setCharacterSize(48);
-        t.setFillColor(sf::Color(227, 125, 77)); // Use a custom color if desired.
-        t.setStyle(sf::Text::Bold);
-        lines.push_back(t);
-    }
+    titleText.setFont(font);
+    titleText.setString("Welcome to the Floor is Lava!");
+    titleText.setCharacterSize(72);
+    titleText.setFillColor(sf::Color(219, 18, 118));
+    titleText.setStyle(sf::Text::Bold);
 
-    const float spacing = 10.f;
-    float totalHeight = 0.f;
-    for (auto& t : lines) {
-        sf::FloatRect bounds = t.getLocalBounds();
-        totalHeight += bounds.height;
-    }
-    totalHeight += spacing * (lines.size() - 1);
+    subtitleText.setFont(font);
+    subtitleText.setString("A Game by Reptile Dysfunction (Group 77)");
+    subtitleText.setCharacterSize(24);
+    subtitleText.setFillColor(sf::Color(219, 18, 118));
+    subtitleText.setStyle(sf::Text::Bold);
+
+    instructionText.setFont(font);
+    instructionText.setString("Click anywhere to continue.");
+    instructionText.setCharacterSize(48);
+    instructionText.setFillColor(sf::Color(219, 18, 118));
+    instructionText.setStyle(sf::Text::Regular);
+
 
     float windowWidth = 1280.f;
-    float windowHeight = 720.f;
-    float startY = (windowHeight - totalHeight) / 2.f;
+    float yTitle = 100.f;
+    sf::FloatRect titleBounds = titleText.getLocalBounds();
+    float ySubtitle = yTitle + titleBounds.height + 50.f;
+    sf::FloatRect subBounds = subtitleText.getLocalBounds();
+    float yInstruction = ySubtitle + subBounds.height + 200.f;
 
-    for (auto& t : lines) {
-        sf::FloatRect bounds = t.getLocalBounds();
-        t.setOrigin(bounds.left + bounds.width / 2.0f,
-                    bounds.top + bounds.height / 2.0f);
-        t.setPosition(windowWidth / 2.0f, startY + bounds.height / 2.0f);
-        startY += bounds.height + spacing;
-    }
+    // Set the origins so that texts are centered horizontally.
+    sf::FloatRect tb = titleText.getLocalBounds();
+    titleText.setOrigin(tb.left + tb.width / 2.0f, 0.f);
+    titleText.setPosition(windowWidth / 2.0f, yTitle);
+
+    sf::FloatRect sb = subtitleText.getLocalBounds();
+    subtitleText.setOrigin(sb.left + sb.width / 2.0f, 0.f);
+    subtitleText.setPosition(windowWidth / 2.0f, ySubtitle);
+
+    sf::FloatRect ib = instructionText.getLocalBounds();
+    instructionText.setOrigin(ib.left + ib.width / 2.0f, 0.f);
+    instructionText.setPosition(windowWidth / 2.0f, yInstruction);
 }
-
 void Title::handleEvent(const sf::Event &event) {
     if (event.type == sf::Event::MouseButtonPressed)
         finished = true;
 }
 
 void Title::draw(sf::RenderWindow& window) {
-    const float padding = 10.f;
-    for (auto& t : lines) {
-        sf::FloatRect bounds = t.getGlobalBounds();
-        sf::RectangleShape rect(sf::Vector2f(bounds.width + padding * 2, bounds.height + padding * 2));
-        rect.setFillColor(sf::Color(255, 255, 255, 200)); // translucent white
-        float rectX = t.getPosition().x - bounds.width / 2.f - padding;
-        float rectY = t.getPosition().y - padding;
-        rect.setPosition(rectX, rectY);
-
-        window.draw(rect);
-        window.draw(t);
-    }
+    window.draw(titleText);
+    window.draw(subtitleText);
+    window.draw(instructionText);
 }
 
 bool Title::isFinished() const {

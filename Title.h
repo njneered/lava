@@ -7,19 +7,19 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
-#include <vector>
 using namespace std;
 
 
 class Title {
-    vector<sf::Text> lines;
-
+    sf::Text titleText;
+    sf::Text subtitleText;
+    sf::Text instructionText;
     sf::Font font;
     bool finished;
 
 
 public:
-    Title(const std::string& message = "Welcome to The Floor is Lava!\n\n\n\n\n\n\n\n\n\n\n\n\n\nA Game by Reptile Dysfunction (Group 77)\n\n\n\n\n\n\n\n\n\n\n\n\n\nClick anywhere to continue.");
+    Title();
 
     void handleEvent(const sf::Event& event);
 
