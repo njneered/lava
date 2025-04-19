@@ -19,3 +19,16 @@
 9	692	7666181754989064	CMakeFiles/the-floor-is-lava.dir/UI-UX/navigator.cpp.obj	52a98a141a66ed2c
 6	842	7666119048602024	CMakeFiles/the-floor-is-lava.dir/UI-UX/map.cpp.obj	f2df6f93af0ef798
 6	980	7666146433889074	CMakeFiles/the-floor-is-lava.dir/algorithms/algorithms.cpp.obj	790c487c778392b0
+12	817	7666200655325703	CMakeFiles/the-floor-is-lava.dir/UI-UX/navigator.cpp.obj	52a98a141a66ed2c
+14	818	7666200655345647	CMakeFiles/the-floor-is-lava.dir/UI-UX/ux.cpp.obj	9187f501b48daa57
+17	848	7666200655375579	CMakeFiles/the-floor-is-lava.dir/UI-UX/gps.cpp.obj	187f3b934b12aeff
+6	887	7666200655265866	CMakeFiles/the-floor-is-lava.dir/main.cpp.obj	fa7bb7a0763d3d73
+9	1004	7666200655295795	CMakeFiles/the-floor-is-lava.dir/UI-UX/map.cpp.obj	f2df6f93af0ef798
+20	1166	7666200655405491	CMakeFiles/the-floor-is-lava.dir/algorithms/algorithms.cpp.obj	790c487c778392b0
+1166	1521	7666200666864877	the-floor-is-lava.exe	a876e4dce71b7600
+39	750	7667780591014442	CMakeFiles/the-floor-is-lava.dir/UI-UX/title.cpp.obj	156b6327a659067a
+750	3994	7667780598115448	the-floor-is-lava.exe	a876e4dce71b7600
+22	761	7667781816039126	CMakeFiles/the-floor-is-lava.dir/main.cpp.obj	fa7bb7a0763d3d73
+761	1082	7667781823429360	the-floor-is-lava.exe	a876e4dce71b7600
+20	816	7667782205775151	CMakeFiles/the-floor-is-lava.dir/main.cpp.obj	fa7bb7a0763d3d73
+817	1146	7667782213743871	the-floor-is-lava.exe	a876e4dce71b7600

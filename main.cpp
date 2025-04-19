@@ -2,7 +2,6 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <cmath>
 
 
 #include "UI-UX/Background.h"
@@ -83,6 +82,14 @@ int main() {
                 ux.setSecondaryMessage("Click the box below and type a destination");
                 ux.clearConfirmationMessage();
                 gps.clearPath();
+            }
+
+            if (event.type == sf::Event::MouseWheelScrolled) {
+                if (event.mouseWheelScroll.delta > 0)
+                    view.zoom(0.9f);
+                else
+                    view.zoom(1.1f);
+                window.setView(view);
             }
 
 
