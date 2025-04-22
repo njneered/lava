@@ -1,7 +1,3 @@
-//
-// Created by Nj on 4/11/2025.
-//
-
 #include "Title.h"
 #include <sstream>
 #include <iostream>

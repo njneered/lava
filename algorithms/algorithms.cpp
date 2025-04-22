@@ -1,129 +1,182 @@
-//
-// Created by Nj on 4/17/2025.
-//
 #include "Algorithms.h"
-#include <queue>
-#include <unordered_map>
+#include <iostream>
 #include <cmath>
+#include <limits>
 #include <algorithm>
+#include "../terrain/constants.h" // For grid size constants
+#include "../terrain/utility.h"
 
-using namespace std;
-
-struct Vector2iHash {
-    size_t operator()(const sf::Vector2i& v) const {
-        size_t xHash = hash<int>()(v.x);
-        size_t yHash = hash<int>()(v.y);
-        return xHash ^ (yHash << 1);
+// Hash function for Vector2i in a priority queue
+struct VectorPriorityQueueCompare {
+    bool operator()(const std::pair<sf::Vector2i, float>& a, const std::pair<sf::Vector2i, float>& b) const {
+        return a.second > b.second; // Min-heap for priority queue
     }
 };
 
-int heuristic(const sf::Vector2i& a, const sf::Vector2i& b) {
-    return abs(a.x - b.x) + abs(a.y - b.y); // Manhattan distance
-}
+// Helper function to get neighbors
+std::vector<sf::Vector2i> getNeighbors(const sf::Vector2i& pos, const Map& map) {
+    std::vector<sf::Vector2i> neighbors;
 
-struct CompareCost {
-    bool operator()(const pair<int, sf::Vector2i>& a, const pair<int, sf::Vector2i>& b) {
-        return a.first > b.first; // Min-heap based on cost
-    }
-};
+    // Four possible directions (up, right, down, left)
+    const int dx[] = {0, 1, 0, -1};
+    const int dy[] = {-1, 0, 1, 0};
 
-vector<sf::Vector2i> findDijkstraPath(const Map& map, sf::Vector2i start, sf::Vector2i goal) {
-    priority_queue<pair<int, sf::Vector2i>, vector<pair<int, sf::Vector2i>>, CompareCost> frontier;
-    frontier.push({0, start});
+    for (int i = 0; i < 4; ++i) {
+        sf::Vector2i next(pos.x + dx[i], pos.y + dy[i]);
 
-    unordered_map<sf::Vector2i, sf::Vector2i, Vector2iHash> cameFrom;
-    unordered_map<sf::Vector2i, int, Vector2iHash> costSoFar;
+        // Check if within grid bounds
+        if (next.x >= 0 && next.x < Chunks::gridWidth &&
+            next.y >= 0 && next.y < Chunks::gridHeight) {
 
-    cameFrom[start] = start;
-    costSoFar[start] = 0;
-
-    vector<sf::Vector2i> directions = {
-        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
-    };
-
-    while (!frontier.empty()) {
-        sf::Vector2i current = frontier.top().second;
-        frontier.pop();
-
-        if (current == goal) break;
-
-        for (const auto& dir : directions) {
-            sf::Vector2i next = current + dir;
-
-            if (next.x < 0 || next.y < 0 || next.x >= map.getWidth() || next.y >= map.getHeight())
-                continue;
-
-            int newCost = costSoFar[current] + 1;
-
-            if (!costSoFar.count(next) || newCost < costSoFar[next]) {
-                costSoFar[next] = newCost;
-                frontier.push({newCost, next});
-                cameFrom[next] = current;
+            // Check if walkable (not lava or other obstacle)
+            if (map.isWalkable(next.x, next.y)) {
+                neighbors.push_back(next);
             }
         }
     }
 
-    vector<sf::Vector2i> path;
-    if (!cameFrom.count(goal)) return path;
+    return neighbors;
+}
 
-    sf::Vector2i current = goal;
-    while (current != start) {
-        path.push_back(current);
-        current = cameFrom[current];
+// Manhattan distance heuristic for A*
+float heuristic(const sf::Vector2i& a, const sf::Vector2i& b) {
+    return static_cast<float>(std::abs(a.x - b.x) + std::abs(a.y - b.y));
+}
+
+// Dijkstra's algorithm implementation
+std::vector<sf::Vector2i> findDijkstraPath(const Map& map, sf::Vector2i start, sf::Vector2i goal) {
+    // Start and goal must be walkable
+    if (!map.isWalkable(start.x, start.y) || !map.isWalkable(goal.x, goal.y)) {
+        return std::vector<sf::Vector2i>();
     }
 
-    path.push_back(start);
-    reverse(path.begin(), path.end());
+    // Priority queue for Dijkstra
+    std::priority_queue<std::pair<sf::Vector2i, float>,
+                        std::vector<std::pair<sf::Vector2i, float>>,
+                        VectorPriorityQueueCompare> openSet;
+
+    // Cost map and visited set
+    std::unordered_map<sf::Vector2i, float, Vector2iHash> costSoFar;
+    std::unordered_map<sf::Vector2i, sf::Vector2i, Vector2iHash> cameFrom;
+
+    // Initialize with start node
+    openSet.push({start, 0.0f});
+    costSoFar[start] = 0.0f;
+    cameFrom[start] = start; // Start came from itself (marker for reconstruction)
+
+    bool foundPath = false;
+
+    while (!openSet.empty()) {
+        auto current = openSet.top().first;
+        openSet.pop();
+
+        // Check if we reached the goal
+        if (current.x == goal.x && current.y == goal.y) {
+            foundPath = true;
+            break;
+        }
+
+        // Get valid neighbors
+        auto neighbors = getNeighbors(current, map);
+
+        for (const auto& next : neighbors) {
+            // Cost is 1.0 for each step (uniform grid)
+            float newCost = costSoFar[current] + 1.0f;
+
+            // If we haven't visited this node or found a better path
+            if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
+                costSoFar[next] = newCost;
+                cameFrom[next] = current;
+                openSet.push({next, newCost});
+            }
+        }
+    }
+
+    // Reconstruct path if found
+    std::vector<sf::Vector2i> path;
+    if (foundPath) {
+        sf::Vector2i current = goal;
+        path.push_back(current);
+
+        while (!(current.x == start.x && current.y == start.y)) {
+            current = cameFrom[current];
+            path.push_back(current);
+        }
+
+        // Reverse to get path from start to goal
+        std::reverse(path.begin(), path.end());
+    }
+
     return path;
 }
 
-vector<sf::Vector2i> findAStarPath(const Map& map, sf::Vector2i start, sf::Vector2i goal) {
-    priority_queue<pair<int, sf::Vector2i>, vector<pair<int, sf::Vector2i>>, CompareCost> frontier;
-    frontier.push({0, start});
+// A* algorithm implementation
+std::vector<sf::Vector2i> findAStarPath(const Map& map, sf::Vector2i start, sf::Vector2i goal) {
+    // Start and goal must be walkable
+    if (!map.isWalkable(start.x, start.y) || !map.isWalkable(goal.x, goal.y)) {
+        return std::vector<sf::Vector2i>();
+    }
 
-    unordered_map<sf::Vector2i, sf::Vector2i, Vector2iHash> cameFrom;
-    unordered_map<sf::Vector2i, int, Vector2iHash> costSoFar;
+    // Priority queue for A*
+    std::priority_queue<std::pair<sf::Vector2i, float>,
+                        std::vector<std::pair<sf::Vector2i, float>>,
+                        VectorPriorityQueueCompare> openSet;
 
-    cameFrom[start] = start;
-    costSoFar[start] = 0;
+    // Cost maps and visited set
+    std::unordered_map<sf::Vector2i, float, Vector2iHash> gScore; // Cost from start
+    std::unordered_map<sf::Vector2i, float, Vector2iHash> fScore; // Estimated total cost
+    std::unordered_map<sf::Vector2i, sf::Vector2i, Vector2iHash> cameFrom;
 
-    vector<sf::Vector2i> directions = {
-        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
-    };
+    // Initialize with start node
+    openSet.push({start, 0.0f});
+    gScore[start] = 0.0f;
+    fScore[start] = heuristic(start, goal);
+    cameFrom[start] = start; // Start came from itself (marker for reconstruction)
 
-    while (!frontier.empty()) {
-        sf::Vector2i current = frontier.top().second;
-        frontier.pop();
+    bool foundPath = false;
 
-        if (current == goal) break;
+    while (!openSet.empty()) {
+        auto current = openSet.top().first;
+        openSet.pop();
 
-        for (const auto& dir : directions) {
-            sf::Vector2i next = current + dir;
+        // Check if we reached the goal
+        if (current.x == goal.x && current.y == goal.y) {
+            foundPath = true;
+            break;
+        }
 
-            if (next.x < 0 || next.y < 0 || next.x >= map.getWidth() || next.y >= map.getHeight())
-                continue;
+        // Get valid neighbors
+        auto neighbors = getNeighbors(current, map);
 
-            int newCost = costSoFar[current] + 1;
+        for (const auto& next : neighbors) {
+            // Cost is 1.0 for each step (uniform grid)
+            float tentative_gScore = gScore[current] + 1.0f;
 
-            if (!costSoFar.count(next) || newCost < costSoFar[next]) {
-                costSoFar[next] = newCost;
-                int priority = newCost + heuristic(next, goal);
-                frontier.push({priority, next});
+            // If we haven't visited this node or found a better path
+            if (gScore.find(next) == gScore.end() || tentative_gScore < gScore[next]) {
+                // Update path and costs
                 cameFrom[next] = current;
+                gScore[next] = tentative_gScore;
+                fScore[next] = tentative_gScore + heuristic(next, goal);
+                openSet.push({next, fScore[next]});
             }
         }
     }
 
-    vector<sf::Vector2i> path;
-    if (!cameFrom.count(goal)) return path;
-
-    sf::Vector2i current = goal;
-    while (current != start) {
+    // Reconstruct path if found
+    std::vector<sf::Vector2i> path;
+    if (foundPath) {
+        sf::Vector2i current = goal;
         path.push_back(current);
-        current = cameFrom[current];
+
+        while (!(current.x == start.x && current.y == start.y)) {
+            current = cameFrom[current];
+            path.push_back(current);
+        }
+
+        // Reverse to get path from start to goal
+        std::reverse(path.begin(), path.end());
     }
 
-    path.push_back(start);
-    reverse(path.begin(), path.end());
     return path;
 }

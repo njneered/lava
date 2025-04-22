@@ -1,19 +1,7 @@
-//
-// Created by Nj on 4/10/2025.
-//
-
 #include "NaviGator.h"
 #include <iostream>
 #include <cmath>
 using namespace std;
-
-sf::Vector2f normalize(const sf::Vector2f &v) {
-    float len = std::sqrt(v.x * v.x + v.y * v.y);
-    if (len != 0) {
-        return sf::Vector2f(v.x / len, v.y / len);
-    }
-    return sf::Vector2f(0.f, 0.f);
-}
 
 NaviGator::NaviGator(const std::string &imagePath, const sf::Vector2f &startPosition)
     : navigatorSpeed(15.f), currentFrame(0), frameDuration(0.2f), animationTimer(0.f), isMoving(false) {
@@ -28,43 +16,47 @@ NaviGator::NaviGator(const std::string &imagePath, const sf::Vector2f &startPosi
 
     navigatorSprite.setOrigin(16, 16);
     navigatorSprite.setPosition(startPosition);
-
     navigatorSprite.setTextureRect(frames[currentFrame]);
-
 }
 
-void NaviGator::handleInput(sf::Time deltaTime, const sf::Event& event, const sf::View& view) {
-    float moveSpeed = navigatorSpeed * deltaTime.asSeconds();
-
+void NaviGator::handleInput(sf::Time deltaTime, const sf::Event& event, sf::View* view) {
     const float tileW = 32.f;
     const float tileH = 16.f;
+    const float moveSpeed = navigatorSpeed * deltaTime.asSeconds();
 
-    sf::Vector2f offset(0.f, 0.f);
-    isMoving = false;
+    sf::Vector2f movement(0.f, 0.f);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-        offset.x -= tileW / 2 * moveSpeed;
-        offset.y += tileH / 2 * moveSpeed;
-        isMoving = true;    }
+    // Handle keyboard movement
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-        offset.x += tileW / 2 * moveSpeed;
-        offset.y -= tileH / 2 * moveSpeed;
-        isMoving = true;    }
+        movement.x += moveSpeed;
+        movement.y -= moveSpeed;
+        isMoving = true;
+        facingLeft = false;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        movement.x -= moveSpeed;
+        movement.y += moveSpeed;
+        isMoving = true;
+        facingLeft = true;
+    }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-        offset.x -= tileW / 2 * moveSpeed;
-        offset.y -= tileH / 2 * moveSpeed;
+        movement.x -= moveSpeed;
+        movement.y -= moveSpeed;
         isMoving = true;
         facingLeft = true;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-        offset.x += tileW / 2 * moveSpeed;
-        offset.y += tileH / 2 * moveSpeed;
+        movement.x += moveSpeed;
+        movement.y += moveSpeed;
         isMoving = true;
         facingLeft = false;
     }
 
-    navigatorSprite.move(offset);
-
+    if (movement.x != 0.f || movement.y != 0.f) {
+        navigatorSprite.move(movement);
+    } else {
+        isMoving = false;
+    }
 }
 
 void NaviGator::update(const sf::Time &frameTime) {
@@ -77,17 +69,21 @@ void NaviGator::update(const sf::Time &frameTime) {
     }
 }
 
-
 void NaviGator::draw(sf::RenderWindow &window) {
+    sf::Vector2f pos = navigatorSprite.getPosition();
+    navigatorSprite.setColor(sf::Color::White);
+    navigatorSprite.setPosition(pos);
+
     if (facingLeft) {
         navigatorSprite.setScale(-1.f, 1.f);
-        navigatorSprite.setOrigin(32.f, 0.f);
+        navigatorSprite.setOrigin(16.f, 16.f);
     } else {
         navigatorSprite.setScale(1.f, 1.f);
-        navigatorSprite.setOrigin(0.f, 0.f);
+        navigatorSprite.setOrigin(16.f, 16.f);
     }
 
     window.draw(navigatorSprite);
+    navigatorSprite.setPosition(pos);
 }
 
 sf::Vector2f NaviGator::getPosition() const {
@@ -99,9 +95,10 @@ void NaviGator::updateFrame() {
     navigatorSprite.setTextureRect(frames[currentFrame]);
 }
 
-
 void NaviGator::setScale(const sf::Vector2f &scale) {
     navigatorSprite.setScale(scale);
 }
 
-
+void NaviGator::setPosition(const sf::Vector2f& pos) {
+    navigatorSprite.setPosition(pos);
+}

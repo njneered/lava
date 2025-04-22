@@ -1,6 +1,3 @@
-//
-// Created by Nj on 4/12/2025.
-//
 
 #include "UX.h"
 #include <iostream>
@@ -33,8 +30,7 @@ UX::UX(const string& message) {
 
     // Position instruction text below secondary text
     sf::FloatRect secondaryBounds = secondaryText.getGlobalBounds();
-    instructionText.setPosition(secondaryText.getPosition().x,
-                                   secondaryText.getPosition().y + secondaryBounds.height + 8.f);
+    instructionText.setPosition(secondaryText.getPosition().x, secondaryText.getPosition().y + secondaryBounds.height + 8.f);
 
     typingActive = false;
     typedCoords = "";
@@ -172,8 +168,6 @@ void UX::updateCursor() {
     cursor.setPosition(inputText.getPosition().x + textBounds.width + 2.f, inputText.getPosition().y);
 
 }
-
-
 
 void UX::setConfirmationMessage(const std::string& message) {
     coordMessage = message;

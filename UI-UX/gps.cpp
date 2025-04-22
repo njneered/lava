@@ -1,22 +1,19 @@
-//
-// Created by Nj on 4/17/2025.
-//
-
 #include "GPS.h"
 #include <cmath>
+#include <iostream>
 
-
-GPS::GPS() : glowAlpha(100), glowDirection(1), currentAlgo(DIJKSTRA) {}
+GPS::GPS()
+    : glowAlpha(100),
+      glowDirection(1),
+      currentAlgo(DIJKSTRA),
+      showingComparison(false) {
+}
 
 void GPS::setPath(const std::vector<sf::Vector2i>& newPath, AlgorithmType algo) {
     path = newPath;
     currentAlgo = algo;
     showingComparison = false;
 }
-
-
-std::vector<sf::Vector2i> dijkstraPath, astarPath;
-bool showingComparison = false;
 
 void GPS::setComparisonPaths(const std::vector<sf::Vector2i>& dPath, const std::vector<sf::Vector2i>& aPath) {
     dijkstraPath = dPath;
@@ -25,6 +22,7 @@ void GPS::setComparisonPaths(const std::vector<sf::Vector2i>& dPath, const std::
 }
 
 void GPS::update(float deltaTime) {
+    // Animate the glow effect
     glowAlpha += glowDirection * 60 * deltaTime;
     if (glowAlpha >= 200) {
         glowAlpha = 200;
@@ -35,104 +33,111 @@ void GPS::update(float deltaTime) {
     }
 }
 
-void GPS::draw(sf::RenderWindow& window) {
+void GPS::draw(sf::RenderWindow& window, const Map& map) {
+    auto areAdjacent = [](const sf::Vector2i& a, const sf::Vector2i& b) -> bool {
+        int dx = std::abs(a.x - b.x);
+        int dy = std::abs(a.y - b.y);
+        return dx + dy == 1;
+    };
+
+    auto drawSafePath = [&](const std::vector<sf::Vector2i>& pathToDraw, sf::Color color, bool glow) {
+        if (pathToDraw.empty()) return;
+
+        sf::Color pathColor = color;
+        if (glow) {
+            pathColor.a = static_cast<sf::Uint8>(glowAlpha);
+        }
+
+        const float tileWidth = 32.f;
+        const float tileHeight = 16.f;
+
+        const float offsetX = 0.f;
+        const float offsetY = 0.f;
+
+        for (const auto& tile : pathToDraw) {
+            // Check if the tile is walkable using Map instead of ChunkManager
+            if (!map.isWalkable(tile.x, tile.y)) {
+                continue;
+            }
+
+            float x = (tile.x - tile.y) * (tileWidth / 2.f) + offsetX;
+            float y = (tile.x + tile.y) * (tileHeight / 2.f) + offsetY;
+
+            sf::CircleShape nodeDot(3.f);
+            nodeDot.setOrigin(3.f, 3.f);
+            nodeDot.setPosition(x, y);
+            nodeDot.setFillColor(pathColor);
+            window.draw(nodeDot);
+        }
+
+        for (size_t i = 1; i < pathToDraw.size(); ++i) {
+            const auto& prev = pathToDraw[i-1];
+            const auto& curr = pathToDraw[i];
+
+            // Check walkability using Map
+            if (!map.isWalkable(prev.x, prev.y) || !map.isWalkable(curr.x, curr.y)) {
+                continue;
+            }
+
+            if (!areAdjacent(prev, curr)) {
+                continue;
+            }
+
+            float x1 = (prev.x - prev.y) * (tileWidth / 2.f) + offsetX;
+            float y1 = (prev.x + prev.y) * (tileHeight / 2.f) + offsetY;
+            float x2 = (curr.x - curr.y) * (tileWidth / 2.f) + offsetX;
+            float y2 = (curr.x + curr.y) * (tileHeight / 2.f) + offsetY;
+
+            sf::Vertex line[] = {
+                sf::Vertex(sf::Vector2f(x1, y1), pathColor),
+                sf::Vertex(sf::Vector2f(x2, y2), pathColor)
+            };
+            window.draw(line, 2, sf::Lines);
+        }
+
+        if (!pathToDraw.empty()) {
+            sf::CircleShape startMarker(6.f);
+            startMarker.setOrigin(6.f, 6.f);
+            float startX = (pathToDraw.front().x - pathToDraw.front().y) * (tileWidth / 2.f) + offsetX;
+            float startY = (pathToDraw.front().x + pathToDraw.front().y) * (tileHeight / 2.f) + offsetY;
+            startMarker.setPosition(startX, startY);
+            startMarker.setFillColor(sf::Color::Green);
+            window.draw(startMarker);
+
+            sf::CircleShape endMarker(6.f);
+            endMarker.setOrigin(6.f, 6.f);
+            float endX = (pathToDraw.back().x - pathToDraw.back().y) * (tileWidth / 2.f) + offsetX;
+            float endY = (pathToDraw.back().x + pathToDraw.back().y) * (tileHeight / 2.f) + offsetY;
+            endMarker.setPosition(endX, endY);
+            endMarker.setFillColor(sf::Color::Yellow);
+            window.draw(endMarker);
+        }
+    };
+
     if (showingComparison) {
-        auto drawPath = [&](const std::vector<sf::Vector2i>& path, sf::Color color) {
-            for (size_t i = 1; i < path.size(); ++i) {
-                sf::Vector2i a = path[i - 1];
-                sf::Vector2i b = path[i];
+        drawSafePath(dijkstraPath, sf::Color(50, 170, 255, 200), false);
+        drawSafePath(astarPath, sf::Color(0, 255, 150, 200), false);
 
-                float ax = (a.x - a.y) * 16.f;
-                float ay = (a.x + a.y) * 8.f;
-                float bx = (b.x - b.y) * 16.f;
-                float by = (b.x + b.y) * 8.f;
+        sf::RectangleShape background(sf::Vector2f(180, 50));
+        background.setFillColor(sf::Color(0, 0, 0, 180));
+        background.setPosition(10, 10);
+        window.draw(background);
 
-                sf::Vector2f dir(bx - ax, by - ay);
-                float length = std::sqrt(dir.x * dir.x + dir.y * dir.y);
-                float rotation = std::atan2(dir.y, dir.x) * 180.f / 3.14159f;
+        sf::RectangleShape dijkstraIndicator(sf::Vector2f(20, 10));
+        dijkstraIndicator.setFillColor(sf::Color(50, 170, 255));
+        dijkstraIndicator.setPosition(20, 20);
+        window.draw(dijkstraIndicator);
 
-                sf::RectangleShape segment(sf::Vector2f(length, 6.f));
-                segment.setFillColor(color);
-                segment.setOrigin(0, 3.f);
-                segment.setPosition(ax, ay);
-                segment.setRotation(rotation);
-                window.draw(segment);
-            }
+        sf::RectangleShape astarIndicator(sf::Vector2f(20, 10));
+        astarIndicator.setFillColor(sf::Color(0, 255, 150));
+        astarIndicator.setPosition(20, 40);
+        window.draw(astarIndicator);
+    } else {
+        sf::Color pathColor = (currentAlgo == DIJKSTRA)
+            ? sf::Color(50, 170, 255)
+            : sf::Color(0, 255, 150);
 
-            if (!path.empty()) {
-                auto drawMarker = [&](sf::Vector2i tile, sf::Color col) {
-                    float x = (tile.x - tile.y) * 16.f;
-                    float y = (tile.x + tile.y) * 8.f;
-                    sf::CircleShape marker(6.f);
-                    marker.setFillColor(col);
-                    marker.setOrigin(6.f, 6.f);
-                    marker.setPosition(x, y);
-                    window.draw(marker);
-                };
-                drawMarker(path.front(), sf::Color::Red);
-                drawMarker(path.back(), sf::Color::Yellow);
-            }
-        };
-
-        drawPath(dijkstraPath, sf::Color(50, 170, 255));  // 🔵 Brighter blue
-        drawPath(astarPath,    sf::Color(0, 255, 150));   // 🟢 Brighter green
-
-        return;
-    }
-
-    if (path.empty()) return;
-
-    sf::Color pathColor = (currentAlgo == DIJKSTRA)
-        ? sf::Color(50, 170, 255, static_cast<sf::Uint8>(glowAlpha))
-        : sf::Color(0, 255, 150, static_cast<sf::Uint8>(glowAlpha));
-
-    for (size_t i = 1; i < path.size(); ++i) {
-        sf::Vector2i a = path[i - 1];
-        sf::Vector2i b = path[i];
-
-        float ax = (a.x - a.y) * 16.f;
-        float ay = (a.x + a.y) * 8.f;
-        float bx = (b.x - b.y) * 16.f;
-        float by = (b.x + b.y) * 8.f;
-
-        sf::Vector2f dir(bx - ax, by - ay);
-        float length = std::sqrt(dir.x * dir.x + dir.y * dir.y);
-        float rotation = std::atan2(dir.y, dir.x) * 180.f / 3.14159f;
-
-        sf::RectangleShape glow(sf::Vector2f(length + 4.f, 8.f));
-        sf::Color glowColor = pathColor;
-        glowColor.a = glowAlpha / 1.5;
-        glow.setFillColor(glowColor);
-        glow.setOrigin(2.f, 4.f);
-        glow.setPosition(ax, ay);
-        glow.setRotation(rotation);
-        window.draw(glow);
-
-        sf::RectangleShape segment(sf::Vector2f(length, 6.f));
-        segment.setFillColor(pathColor);
-        segment.setOrigin(0, 3.f);
-        segment.setPosition(ax, ay);
-        segment.setRotation(rotation);
-        window.draw(segment);
-    }
-
-    if (!path.empty()) {
-        float startX = (path.front().x - path.front().y) * 16.f;
-        float startY = (path.front().x + path.front().y) * 8.f;
-        float endX   = (path.back().x - path.back().y) * 16.f;
-        float endY   = (path.back().x + path.back().y) * 8.f;
-
-        sf::CircleShape startMarker(6.f);
-        startMarker.setFillColor(sf::Color::Red);
-        startMarker.setOrigin(6.f, 6.f);
-        startMarker.setPosition(startX, startY);
-        window.draw(startMarker);
-
-        sf::CircleShape endMarker(6.f);
-        endMarker.setFillColor(sf::Color::Yellow);
-        endMarker.setOrigin(6.f, 6.f);
-        endMarker.setPosition(endX, endY);
-        window.draw(endMarker);
+        drawSafePath(path, pathColor, true);
     }
 }
 

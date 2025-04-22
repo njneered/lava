@@ -1,7 +1,3 @@
-//
-// Created by Nj on 4/11/2025.
-//
-
 #include "Background.h"
 #include <iostream>
 using namespace std;

@@ -1,7 +1,3 @@
-//
-// Created by Nj on 4/10/2025.
-//
-
 #ifndef NAVIGATOR_H
 #define NAVIGATOR_H
 
@@ -28,12 +24,15 @@ class NaviGator {
 
 public:
     NaviGator(const string& texturePath, const sf::Vector2f &startPosition);
-    void handleInput(sf::Time deltaTime, const sf::Event& event, const sf::View& view);
+
+    // Fixed: Changed default parameter to avoid reference binding issue
+    void handleInput(sf::Time deltaTime, const sf::Event &event = sf::Event(), sf::View *view = nullptr);
+
     void update(const sf::Time &frameTime);
     void draw(sf::RenderWindow &window);
     void setScale(const sf::Vector2f &scale);
     sf::Vector2f getPosition() const;
-
+    void setPosition(const sf::Vector2f& pos);
 };
 
 #endif //NAVIGATOR_H

@@ -1,7 +1,3 @@
-//
-// Created by Nj on 4/11/2025.
-//
-
 #ifndef SOUNDTRACK_H
 #define SOUNDTRACK_H
 

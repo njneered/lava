@@ -1,7 +1,3 @@
-//
-// Created by Nj on 4/11/2025.
-//
-
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 

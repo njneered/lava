@@ -1,16 +1,17 @@
-//
-// Created by Nj on 4/17/2025.
-//
-
 #ifndef ALGORITHMS_H
 #define ALGORITHMS_H
 
 #include <vector>
-#include <SFML/System.hpp>
-#include "../UI-UX/Map.h"
-using namespace std;
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+#include <SFML/System/Vector2.hpp>
+#include "map.h" // Changed from chunkManager to map
 
-vector<sf::Vector2i> findDijkstraPath(const Map& map, sf::Vector2i start, sf::Vector2i goal);
-vector<sf::Vector2i> findAStarPath(const Map& map, sf::Vector2i start, sf::Vector2i goal);
+// Dijkstra's algorithm implementation
+std::vector<sf::Vector2i> findDijkstraPath(const Map& map, sf::Vector2i start, sf::Vector2i goal);
 
-#endif
+// A* algorithm implementation
+std::vector<sf::Vector2i> findAStarPath(const Map& map, sf::Vector2i start, sf::Vector2i goal);
+
+#endif // ALGORITHMS_H

@@ -1,3 +1,0 @@
-C:/Users/Nj/CLionProjects/TheFloorIsLava/cmake-build-debug/CMakeFiles/the-floor-is-lava.dir
-C:/Users/Nj/CLionProjects/TheFloorIsLava/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Nj/CLionProjects/TheFloorIsLava/cmake-build-debug/CMakeFiles/rebuild_cache.dir

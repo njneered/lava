@@ -1,7 +1,3 @@
-//
-// Created by Nj on 4/12/2025.
-//
-
 #ifndef UX_H
 #define UX_H
 
@@ -29,9 +25,6 @@ class UX {
     bool typingActive;
     bool cursorVisible;
 
-
-
-
 public:
     UX(const string& message);
 
@@ -47,9 +40,9 @@ public:
     void updateCursor();
     void setConfirmationMessage(const std::string& message);
     void clearConfirmationMessage();
+    bool isTypingActive() const { return typingActive; }
 
     sf::Vector2i getTypedCoordinates() const;
-
 };
 
-#endif //UX_H
+#endif
