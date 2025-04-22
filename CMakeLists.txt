@@ -27,6 +27,7 @@ add_executable(the-floor-is-lava
         UI-UX/gps.cpp
         algorithms/Algorithms.h
         algorithms/algorithms.cpp
+        UI-UX/LavaGenerator.cpp
 )
 
 target_link_libraries(the-floor-is-lava

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <random>
 
 
 #include "UI-UX/Background.h"
@@ -13,9 +14,29 @@
 #include "UI-UX/GPS.h"
 #include "algorithms/Algorithms.h"
 
+bool verifyPathSegments(const std::vector<sf::Vector2i>& path, const Map& map) {
+    for (size_t i = 0; i + 1 < path.size(); ++i) {
+        sf::Vector2i a = path[i], b = path[i + 1];
+        int dx = abs(a.x - b.x), dy = abs(a.y - b.y);
+        if (dx > 1 || dy > 1) return false;
+        if (!map.isWalkable(a.x, a.y) || !map.isWalkable(b.x, b.y)) return false;
+    }
+    return true;
+}
+
 int main() {
+
     sf::RenderWindow window(sf::VideoMode(1280, 720), "The Floor is Lava!!!");
     window.setFramerateLimit(60);
+
+    // Test texture loading
+    sf::Texture testTexture;
+    if (testTexture.loadFromFile("sprites/spritesheet.png")) {
+        std::cout << "Successfully loaded test texture: "
+                << testTexture.getSize().x << "x" << testTexture.getSize().y << std::endl;
+    } else {
+        std::cerr << "Failed to load test texture!" << std::endl;
+    }
 
     Soundtrack soundtrack;
     soundtrack.loadFromFile("assets/soundtrack.mp3");
@@ -36,9 +57,24 @@ int main() {
         window.display();
     }
 
+    // Load the map
     Map gameMap;
-    if (!gameMap.loadFromFile("maps/floorIsLava.tmx", 32, 16)) return 1;
+    if (!gameMap.loadFromFile("maps/floorIsLava.tmx", 32, 16)) {
+        std::cerr << "Failed to load map file. Using an empty map." << std::endl;
+    }
 
+    // Generate random seed for lava
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    unsigned int seed = rng();
+
+    // Initialize and generate lava
+    gameMap.initLavaGenerator(seed);
+
+    // Generate the lava
+    gameMap.generateLava();
+
+    // Set up the view
     sf::View view;
     view.setSize(400, 300);
     float centerX = ((gameMap.getWidth() - gameMap.getHeight()) * 16.f) / 2.f;
@@ -46,6 +82,7 @@ int main() {
     view.setCenter(centerX, centerY);
     window.setView(view);
 
+    // Set up the game UI and objects
     Background gameBackground("assets/sky.jpeg");
     NaviGator navigator("sprites/navigator.png", sf::Vector2f(0.f, 0.f));
     sf::Clock clock;
@@ -57,6 +94,7 @@ int main() {
     GPS gps;
     bool coordinatesReady = false;
 
+    // Main game loop
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -68,13 +106,21 @@ int main() {
                 enteredPointB = ux.getTypedCoordinates();
                 coordinatesReady = true;
 
-                std::stringstream ss;
-                ss << "Destination set to (" << enteredPointB.x << ", " << enteredPointB.y << ")\n";
-                ss << "Press 1 for Dijkstra, 2 for A*, 3 to compare both";
-                ux.setConfirmationMessage(ss.str());
+                // Check if destination is on lava
+                if (gameMap.isLava(enteredPointB.x, enteredPointB.y)) {
+                    ux.setConfirmationMessage("That destination is on lava! Try a different location.");
+                    coordinatesReady = false;
+                } else {
+                    std::stringstream ss;
+                    ss << "Destination set to (" << enteredPointB.x << ", " << enteredPointB.y << ")\n";
+                    ss << "Press 1 for Dijkstra, 2 for A*, 3 to compare both";
+                    ux.setConfirmationMessage(ss.str());
+                }
+
                 ux.resetTypedCoordinates();
             }
 
+            // Reset button
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
                 coordinatesReady = false;
                 ux.resetTypedCoordinates();
@@ -84,6 +130,16 @@ int main() {
                 gps.clearPath();
             }
 
+            // Regenerate lava with G key
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G) {
+                // New random seed
+                seed = rng();
+                gameMap.initLavaGenerator(seed);
+                gameMap.generateLava();
+                ux.setConfirmationMessage("Lava regenerated with new seed: " + std::to_string(seed));
+            }
+
+            // Zoom control
             if (event.type == sf::Event::MouseWheelScrolled) {
                 if (event.mouseWheelScroll.delta > 0)
                     view.zoom(0.9f);
@@ -92,31 +148,60 @@ int main() {
                 window.setView(view);
             }
 
-
+            // Pathfinding key handling
             if (coordinatesReady && event.type == sf::Event::KeyPressed) {
-                float ax = (navigator.getPosition().y / 8.0f + navigator.getPosition().x / 16.0f) / 2.0f;
-                float ay = (navigator.getPosition().y / 8.0f - navigator.getPosition().x / 16.0f) / 2.0f;
-                sf::Vector2i pointA(static_cast<int>(ax), static_cast<int>(ay));
+                // Convert navigator position to tile coordinates
+                sf::Vector2f navigatorPos = navigator.getPosition();
+                sf::Vector2i pointA = gameMap.screenToTile(navigatorPos.x, navigatorPos.y);
+
+                // Check if we're standing on lava
+                if (gameMap.isLava(pointA.x, pointA.y)) {
+                    ux.setConfirmationMessage("You're standing on lava! Move to a safe location first.");
+                    continue;
+                }
 
                 if (event.key.code == sf::Keyboard::Num1) {
-                    gps.setPath(findDijkstraPath(gameMap, pointA, enteredPointB), DIJKSTRA);
+                    auto path = findDijkstraPath(gameMap, pointA, enteredPointB);
 
-                    ux.clearConfirmationMessage();
-                } else if (event.key.code == sf::Keyboard::Num2) {
-                    gps.setPath(findAStarPath(gameMap, pointA, enteredPointB), ASTAR);
+                    if (path.empty()) {
+                        ux.setConfirmationMessage("Dijkstra couldn't find a path! Try a different destination.");
+                    } else {
+                        gps.setPath(path, DIJKSTRA);
+                        ux.setConfirmationMessage("Dijkstra path found with " + std::to_string(path.size()) + " steps.");
+                    }
+                }
+                else if (event.key.code == sf::Keyboard::Num2) {
+                    auto path = findAStarPath(gameMap, pointA, enteredPointB);
 
-                    ux.clearConfirmationMessage();
-                } else if (event.key.code == sf::Keyboard::Num3) {
-                    gps.setComparisonPaths(findDijkstraPath(gameMap, pointA, enteredPointB),
-                                           findAStarPath(gameMap, pointA, enteredPointB));
+                    if (path.empty()) {
+                        ux.setConfirmationMessage("A* couldn't find a path! Try a different destination.");
+                    } else {
+                        gps.setPath(path, ASTAR);
+                        ux.setConfirmationMessage("A* path found with " + std::to_string(path.size()) + " steps.");
+                    }
+                }
+                else if (event.key.code == sf::Keyboard::Num3) {
+                    auto pathD = findDijkstraPath(gameMap, pointA, enteredPointB);
+                    auto pathA = findAStarPath(gameMap, pointA, enteredPointB);
 
-                    ux.clearConfirmationMessage();
+                    if (pathD.empty() && pathA.empty()) {
+                        ux.setConfirmationMessage("Neither algorithm could find a path! Try a different destination.");
+                    } else {
+                        gps.setComparisonPaths(pathD, pathA);
+
+                        std::stringstream ss;
+                        ss << "Dijkstra: " << pathD.size() << " steps, A*: " << pathA.size() << " steps";
+                        if (pathD.empty()) ss << " (Dijkstra failed)";
+                        if (pathA.empty()) ss << " (A* failed)";
+                        ux.setConfirmationMessage(ss.str());
+                    }
                 }
             }
 
             navigator.handleInput(sf::Time::Zero, event, view);
         }
 
+        // Update game objects
         sf::Time frameTime = clock.restart();
         navigator.handleInput(frameTime, sf::Event(), view);
         navigator.update(frameTime);
@@ -126,6 +211,7 @@ int main() {
         view.setCenter(navigator.getPosition());
         window.setView(view);
 
+        // Render frame
         window.clear(sf::Color::Black);
         window.setView(window.getDefaultView());
         gameBackground.draw(window);

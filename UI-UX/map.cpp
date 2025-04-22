@@ -6,7 +6,8 @@ using namespace tinyxml2;
 
 using namespace std;
 
-Map::Map() : tileWidth(32), tileHeight(16) {}
+Map::Map() : tileWidth(32), tileHeight(16), lavaGenerator(nullptr), useLavaGenerator(false) {}
+
 
 bool Map::loadFromFile(const std::string& tmxFilePath, int tw, int th) {
   tileWidth = tw;
@@ -23,12 +24,13 @@ bool Map::loadFromFile(const std::string& tmxFilePath, int tw, int th) {
       cerr << "No <map> element found.\n";
       return false;
   }
+    lavaTexture.loadFromFile("sprites/lava-1.png");
 
   int width = mapElement->IntAttribute("width");
   int height = mapElement->IntAttribute("height");
 
-  if (!parseTilesets(mapElement)) return false;
-  if (!parseLayers(mapElement, width, height)) return false;
+    if (!parseTilesets(mapElement)) return false;
+    if (!parseLayers(mapElement, width, height)) return false;
     if (!lavaTexture.loadFromFile("sprites/lava-1.png")) {
         std::cerr << "Failed to load lava-1.png\n";
     } else {
@@ -36,7 +38,13 @@ bool Map::loadFromFile(const std::string& tmxFilePath, int tw, int th) {
         generateSpreadingLava(100, 50); // number of lava tiles
     }
 
-  return true;
+    if (!lavaTexture.loadFromFile("sprites/lava-1.png")) {
+        std::cerr << "🔥 Failed to load lava-1.png!\n";
+    } else {
+        std::cout << "✅ Loaded lava-1.png: " << lavaTexture.getSize().x << "x" << lavaTexture.getSize().y << "\n";
+    }
+
+    return true;
 }
 
 bool Map::parseTilesets(XMLElement* mapElement) {
@@ -198,6 +206,12 @@ void Map::draw(sf::RenderWindow& window) const {
                 isoY -= (actualTileHeight - logicalTileHeight);
 
                 sprite.setPosition(isoX, isoY);
+                if (isLava(x, y)) {
+                    sprite.setTexture(lavaTexture);  // Use lava texture
+                    sprite.setTextureRect(sf::IntRect(0, 0, 32, 64)); // or whatever lava-1.png size is
+                } else {
+                    sprite.setTexture(tilesheet);    // Reset to regular tilesheet
+                }
                 window.draw(sprite);
             }
         }
@@ -264,6 +278,64 @@ void Map::generateSpreadingLava(int seedCount, int initialLavaPerSeed) {
             }
         }
     }
+}
+
+Map::~Map() {
+    delete lavaGenerator;
+}
+
+// Init lava generator
+void Map::initLavaGenerator(unsigned int seed) {
+    if (lavaGenerator) delete lavaGenerator;
+    lavaGenerator = new LavaGenerator(getWidth(), getHeight(), seed);
+    useLavaGenerator = true;
+}
+
+// Generate lava
+void Map::generateLava() {
+    if (lavaGenerator) {
+        lavaGenerator->generate();
+    }
+}
+
+// Lava parameter setters
+void Map::setLavaFrequency(float freq) {
+    if (lavaGenerator) lavaGenerator->setFrequency(freq);
+}
+void Map::setLavaThreshold(float thresh) {
+    if (lavaGenerator) lavaGenerator->setThreshold(thresh);
+}
+void Map::setLavaPersistence(float persist) {
+    if (lavaGenerator) lavaGenerator->setPersistence(persist);
+}
+void Map::setLavaOctaves(int oct) {
+    if (lavaGenerator) lavaGenerator->setOctaves(oct);
+}
+
+// isLava
+bool Map::isLava(int x, int y) const {
+    return lavaGenerator && lavaGenerator->isLava(x, y);
+}
+
+// isWalkable
+bool Map::isWalkable(int x, int y) const {
+    return !isLava(x, y); // Could be more complex later
+}
+
+// screenToTile
+sf::Vector2i Map::screenToTile(float screenX, float screenY) const {
+    float x = screenX / tileWidth;
+    float y = screenY / tileHeight;
+    int tileX = static_cast<int>((y + x) / 2.f);
+    int tileY = static_cast<int>((y - x) / 2.f);
+    return sf::Vector2i(tileX, tileY);
+}
+
+// tileToScreen
+sf::Vector2f Map::tileToScreen(int x, int y) const {
+    float screenX = (x - y) * tileWidth / 2.f;
+    float screenY = (x + y) * tileHeight / 2.f;
+    return sf::Vector2f(screenX, screenY);
 }
 
 
