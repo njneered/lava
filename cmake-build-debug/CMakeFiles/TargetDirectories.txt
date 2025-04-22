@@ -1,0 +1,3 @@
+C:/Users/andon/Documents/Academics/Spring 2025/COP3530/Assignments/lava/cmake-build-debug/CMakeFiles/the-floor-is-lava.dir
+C:/Users/andon/Documents/Academics/Spring 2025/COP3530/Assignments/lava/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/andon/Documents/Academics/Spring 2025/COP3530/Assignments/lava/cmake-build-debug/CMakeFiles/rebuild_cache.dir
