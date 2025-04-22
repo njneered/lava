@@ -53,6 +53,9 @@ vector<sf::Vector2i> findDijkstraPath(const Map& map, sf::Vector2i start, sf::Ve
             if (next.x < 0 || next.y < 0 || next.x >= map.getWidth() || next.y >= map.getHeight())
                 continue;
 
+            if (map.isLava(next.x, next.y))
+                continue;
+
             int newCost = costSoFar[current] + 1;
 
             if (!costSoFar.count(next) || newCost < costSoFar[next]) {

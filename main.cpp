@@ -120,6 +120,8 @@ int main() {
         sf::Time frameTime = clock.restart();
         navigator.handleInput(frameTime, sf::Event(), view);
         navigator.update(frameTime);
+        gameMap.updateLavaSpread(frameTime.asSeconds());
+
         gps.update(frameTime.asSeconds());
         view.setCenter(navigator.getPosition());
         window.setView(view);

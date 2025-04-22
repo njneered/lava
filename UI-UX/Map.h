@@ -25,10 +25,15 @@ class Map {
     vector<TileLayer> layers;
     map<unsigned, sf::Texture> tileTextures;
     map<unsigned, sf::Sprite> tileSprites;
+    vector<sf::Vector2i> lavaTiles;
+    sf::Texture lavaTexture;
+    sf::Sprite lavaSprite;
 
     unsigned tilesetFirstGID;
     int tileWidth;
     int tileHeight;
+
+    float lavaTimer = 0.0f;
 
 public:
     Map();
@@ -36,8 +41,12 @@ public:
     bool loadFromFile(const std::string& tmxFilePath, int tileWidth, int tileHeight);
     bool parseTilesets(tinyxml2::XMLElement* mapElement);
     bool parseLayers(tinyxml2::XMLElement* mapElement, int width, int height);
+    void generateSpreadingLava(int seedCount, int initialLavaPerSeed);
+    bool isLava(int x, int y) const;
+    const std::vector<sf::Vector2i>& getLavaTiles() const;
 
     void draw(sf::RenderWindow& window) const;
+    void updateLavaSpread(float deltaTime);
 
     int getWidth() const;
     int getHeight() const;

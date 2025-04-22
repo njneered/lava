@@ -29,6 +29,12 @@ bool Map::loadFromFile(const std::string& tmxFilePath, int tw, int th) {
 
   if (!parseTilesets(mapElement)) return false;
   if (!parseLayers(mapElement, width, height)) return false;
+    if (!lavaTexture.loadFromFile("sprites/lava-1.png")) {
+        std::cerr << "Failed to load lava-1.png\n";
+    } else {
+        lavaSprite.setTexture(lavaTexture);
+        generateSpreadingLava(100, 50); // number of lava tiles
+    }
 
   return true;
 }
@@ -196,6 +202,13 @@ void Map::draw(sf::RenderWindow& window) const {
             }
         }
     }
+    for (const auto& tile : lavaTiles) {
+        float isoX = (tile.x - tile.y) * (tileWidth / 2.f);
+        float isoY = (tile.x + tile.y) * (tileHeight / 2.f);
+        sf::Sprite tempLavaSprite = lavaSprite;
+        tempLavaSprite.setPosition(isoX, isoY);
+        window.draw(tempLavaSprite);
+    }
 }
 
 int Map::getWidth() const {
@@ -206,4 +219,97 @@ int Map::getHeight() const {
   return layers.empty() ? 0 : layers[0].height;
 }
 
+void Map::generateSpreadingLava(int seedCount, int initialLavaPerSeed) {
+    lavaTiles.clear();
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
+    int w = getWidth();
+    int h = getHeight();
+    sf::Vector2i spawn(0, 0);
+
+    std::vector<sf::Vector2i> seeds;
+
+    // 1. Generate multiple lava seeds
+    while (seeds.size() < static_cast<size_t>(seedCount)) {
+        sf::Vector2i s(rand() % w, rand() % h);
+        if (s != spawn && std::find(seeds.begin(), seeds.end(), s) == seeds.end()) {
+            seeds.push_back(s);
+            lavaTiles.push_back(s); // start from this tile
+        }
+    }
+
+    // 2. For each seed, grow lava outward a bit
+    std::vector<sf::Vector2i> directions = {
+        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+    };
+
+    for (const auto& seed : seeds) {
+        std::vector<sf::Vector2i> frontier = { seed };
+
+        for (int i = 0; i < initialLavaPerSeed; ++i) {
+            if (frontier.empty()) break;
+
+            sf::Vector2i base = frontier[rand() % frontier.size()];
+            sf::Vector2i dir = directions[rand() % directions.size()];
+            sf::Vector2i next = base + dir;
+
+            if (next.x < 0 || next.y < 0 || next.x >= w || next.y >= h)
+                continue;
+
+            if (next == spawn) continue;
+
+            if (std::find(lavaTiles.begin(), lavaTiles.end(), next) == lavaTiles.end()) {
+                lavaTiles.push_back(next);
+                frontier.push_back(next);
+            }
+        }
+    }
+}
+
+
+bool Map::isLava(int x, int y) const {
+    return std::find(lavaTiles.begin(), lavaTiles.end(), sf::Vector2i(x, y)) != lavaTiles.end();
+}
+
+const std::vector<sf::Vector2i>& Map::getLavaTiles() const {
+    return lavaTiles;
+}
+
+void Map::updateLavaSpread(float deltaTime) {
+    lavaTimer += deltaTime;
+
+    if (lavaTimer < 3.0f) return;
+    lavaTimer = 0.0f;
+
+    int w = getWidth();
+    int h = getHeight();
+    std::vector<sf::Vector2i> newLava;
+    std::vector<sf::Vector2i> directions = {
+        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+    };
+
+    int maxNewTiles = 10;
+    int added = 0;
+
+    for (const auto& tile : lavaTiles) {
+        for (const auto& dir : directions) {
+            sf::Vector2i next = tile + dir;
+
+            if (next.x < 0 || next.y < 0 || next.x >= w || next.y >= h)
+                continue;
+
+            if (!isLava(next.x, next.y)) {
+                newLava.push_back(next);
+                added++;
+                break; // spread 1 tile per existing lava tile
+            }
+
+            if (added >= maxNewTiles) break;
+        }
+        if (added >= maxNewTiles) break;
+    }
+
+    for (const auto& tile : newLava) {
+        lavaTiles.push_back(tile);
+    }
+}
