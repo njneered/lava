@@ -37,7 +37,7 @@ int main() {
     }
 
     Map gameMap;
-    if (!gameMap.loadFromFile("maps/map.tmx", 32, 16)) return 1;
+    if (!gameMap.loadFromFile("maps/floorIsLava.tmx", 32, 16)) return 1;
 
     sf::View view;
     view.setSize(400, 300);
