@@ -15,7 +15,7 @@ Title::Title() : finished(false) {
     titleText.setStyle(sf::Text::Bold);
 
     subtitleText.setFont(font);
-    subtitleText.setString("A Game by Reptile Dysfunction (Group 77)");
+    subtitleText.setString("A GPS Simulation by Reptile Dysfunction (Group 77)");
     subtitleText.setCharacterSize(24);
     subtitleText.setFillColor(sf::Color(219, 18, 118));
     subtitleText.setStyle(sf::Text::Bold);

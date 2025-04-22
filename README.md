@@ -1,7 +1,10 @@
 # the-floor-is-lava
 
-"The Floor is Lava!!!" made by Reptile Dysfunction (Group 77) is a tile-based isometric pathfinding game built with **SFML**, featuring:
-pixel art made by Group 77, DIJKSTRA'S ALGORITHM, A* ALGORITHM, real-time path comparison, walking animation, dynamic UI with coordinate input, LAVA!!!!
+"The Floor is Lava!!!" made by Reptile Dysfunction (Group 77) is a tile-based isometric GPS simulation built with **SFML**, featuring:
+pixel art made by Group 77, DIJKSTRA'S ALGORITHM, A* ALGORITHM, real-time path comparison, walking animation, dynamic UI with coordinate input, procedural generation and Perlin Nose, and LAVA!!!!
+
+## DISCLAIMER
+This project was coded "in-house." The frequency of code commits to the repository does not accurately reflect the contributions of either programming partner. Both team members collaborated closely in person, working on shared AND individual devices, and contributed equally through direct pair programming sessions and joint problem-solving.
 
 ## HOW-TO
 
@@ -10,7 +13,8 @@ pixel art made by Group 77, DIJKSTRA'S ALGORITHM, A* ALGORITHM, real-time path c
 3. Type in your chosen destination tile coordinates
 4. Choose your pathfinding mode: 1 for DIJKSTRA'S, 2 for A*, 3 to compare both
 5. Move your NaviGator using WASD in isometric space
-6. Press R to reset and enter a new destination
+6. Use the mouse wheel scroll to zoom in or out of the map
+7. Press R to reset and enter a new destination
 
 ## FEATURES
 1. Isometric tile rendering (32x16 diamond tiles)
@@ -36,7 +40,8 @@ Each path is recalculated in real time based on NaviGator's position and destina
 - [SFML 2.5.x](https://www.sfml-dev.org/) – graphics, input, and audio
 - C++17
 - Tiled (.tmx) map format
-
+- Piskel, an online pixel art editor
+- Tile Customizer, a tool created by Raphael Gonçalves | twitter: @rgs_dev
 ---
 
 ## Music Credit
@@ -48,20 +53,14 @@ Each path is recalculated in real time based on NaviGator's position and destina
 
 ---
 
-## Next Features (Coming Soon?)
-
-- [ ] Lava spreading logic 🌋
-- [ ] Tile cost weights (danger zones)
-- [ ] Obstacles and impassable tiles
-- [ ] Diagonal movement and smarter AI
-- [ ] Leaderboard system
-
----
-
 ## Author
-@andonthenguyen | @njneered | Reptile Dysfunction - Group 77
+Andon Nguyen        | @andonthenguyen
 
-Made with fun, lava, and pathfinding magic ✨  
-Feel free to fork, improve, or remix it!
+NJ Lacambra         | @njneered
+
+Reptile Dysfunction | Group 77
+
+COP3530  Data Structures & Algorithms Spring 2025
+University of Florida
 
 
