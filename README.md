@@ -3,6 +3,9 @@
 "The Floor is Lava!!!" made by Reptile Dysfunction (Group 77) is a tile-based isometric GPS simulation built with **SFML**, featuring:
 pixel art made by Group 77, DIJKSTRA'S ALGORITHM, A* ALGORITHM, real-time path comparison, walking animation, dynamic UI with coordinate input, procedural generation and Perlin Nose, and LAVA!!!!
 
+## DISCLAIMER
+This project was coded "in-house." The frequency of code commits to the repository does not accurately reflect the contributions of either programming partner. Both team members collaborated closely in person, working on shared AND individual devices, and contributed equally through direct pair programming sessions and joint problem-solving.
+
 ## HOW-TO
 
 1. Launch the program
@@ -52,7 +55,9 @@ Each path is recalculated in real time based on NaviGator's position and destina
 
 ## Author
 Andon Nguyen        | @andonthenguyen
+
 NJ Lacambra         | @njneered
+
 Reptile Dysfunction | Group 77
 
 COP3530  Data Structures & Algorithms Spring 2025
